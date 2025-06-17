@@ -1,6 +1,7 @@
 #include "Window.hpp"
 #include "VulkanContext.hpp"
 #include "VulkanInstance.hpp"
+#include "VulkanDevice.hpp"
 
 int main()
 {
@@ -10,6 +11,7 @@ int main()
 		
 		VulkanContext ctx;
 		VulkanInstance vulkanInstance(ctx);
+		VulkanDevice vulkanDevice(ctx);
 
 		GLFWwindow* glfwWindow = window.getWindow();
 		while (!glfwWindowShouldClose(glfwWindow))
