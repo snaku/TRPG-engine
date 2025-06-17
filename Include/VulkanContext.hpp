@@ -1,6 +1,7 @@
 #pragma once
 #include <vulkan/vulkan.h>
 #include <stdexcept>
+#include <vector>
 
 #define VK_THROW(msg) throw std::runtime_error(std::string("Vulkan error: ") + (msg))
 #define VK_CHECK(x)															\
@@ -12,4 +13,7 @@
 struct VulkanContext
 {
 	VkInstance instance = VK_NULL_HANDLE;
+	VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
+	std::vector<const char*> validationLayers;
+	bool enableValidationLayers;
 };
