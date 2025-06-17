@@ -10,6 +10,7 @@ public:
 
 private:
 	void createInstance();
+	bool checkValidationLayer();
 
 	VulkanContext& vkCtx_;
 };
