@@ -10,5 +10,6 @@ public:
 
 private:
 	void pickPhysicalDevice();
+	bool isDeviceSuitable(VkPhysicalDevice device);
 	VulkanContext& vkCtx_;
 };
