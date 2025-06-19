@@ -1,6 +1,6 @@
-#include "VulkanContext.hpp"
-#include "Window.hpp"
-#include "VulkanInstance.hpp"
+#include "../Include/VulkanContext.hpp"
+#include "../Include/Window.hpp"
+#include "../Include/VulkanInstance.hpp"
 
 #include <iostream>
 #include <cstring>

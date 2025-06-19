@@ -1,16 +1,19 @@
 #pragma once
 
 struct VulkanContext;
+class Window;
 
 class VulkanInstance
 {
 public:
-	explicit VulkanInstance(VulkanContext& ctx);
+	VulkanInstance(VulkanContext& ctx, Window& window);
 	~VulkanInstance() noexcept;
 
 private:
 	void createInstance();
+	void createSurface();
 	bool checkValidationLayer();
 
 	VulkanContext& vkCtx_;
+	Window& window_;
 };
