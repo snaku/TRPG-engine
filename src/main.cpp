@@ -1,7 +1,7 @@
-#include "Window.hpp"
-#include "VulkanContext.hpp"
-#include "VulkanInstance.hpp"
-#include "VulkanDevice.hpp"
+#include "../Include/Window.hpp"
+#include "../Include/VulkanContext.hpp"
+#include "../Include/VulkanInstance.hpp"
+#include "../Include/VulkanDevice.hpp"
 
 int main()
 {
