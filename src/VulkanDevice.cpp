@@ -2,14 +2,19 @@
 #include "VulkanDevice.hpp"
 
 #include <iostream>
+#include <set>
 
 VulkanDevice::VulkanDevice(VulkanContext& ctx) : vkCtx_(ctx)
 {
 	pickPhysicalDevice();
+	createLogicalDevice();
 }
 VulkanDevice::~VulkanDevice() noexcept
 {
-	// vkDestroyDevice
+	if (vkCtx_.device != VK_NULL_HANDLE)
+	{
+		vkDestroyDevice(vkCtx_.device, nullptr);
+	}
 }
 
 void VulkanDevice::pickPhysicalDevice()
@@ -42,7 +47,7 @@ bool VulkanDevice::isDeviceSuitable(VkPhysicalDevice device)
 	VkPhysicalDeviceProperties deviceProperties;
 	vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
 	vkGetPhysicalDeviceProperties(device, &deviceProperties);
-	
+
 	if (deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU &&
 		deviceFeatures.geometryShader)
 	{
@@ -50,4 +55,72 @@ bool VulkanDevice::isDeviceSuitable(VkPhysicalDevice device)
 		return true;
 	}
 	
+	return false;
+}
+
+VulkanDevice::QueueFamilyIndices VulkanDevice::findQueueFamilies(VkPhysicalDevice device)
+{
+	QueueFamilyIndices indices;
+
+	uint32_t queueCount = 0;
+	vkGetPhysicalDeviceQueueFamilyProperties(device, &queueCount, nullptr);
+
+	std::vector<VkQueueFamilyProperties> queueFamilies(queueCount);
+	vkGetPhysicalDeviceQueueFamilyProperties(device, &queueCount, queueFamilies.data());
+
+	int i = 0;
+	for (const auto& queueFamily : queueFamilies)
+	{
+		if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
+		{
+			indices.graphicsFamily = i;
+		}
+
+		VkBool32 presentSupport = VK_FALSE;
+		vkGetPhysicalDeviceSurfaceSupportKHR(device, i, vkCtx_.surface, &presentSupport);
+
+		if (presentSupport)
+		{
+			indices.presentFamily = i;
+		}
+
+		if (indices.isComplete()) break;
+
+		i++;
+	}
+
+	return indices;
+}
+
+void VulkanDevice::createLogicalDevice()
+{
+	QueueFamilyIndices indices = findQueueFamilies(vkCtx_.physicalDevice);
+
+	std::cout << "gfx queue index: " << indices.graphicsFamily.value() <<
+		"\npresent queue index: " << indices.presentFamily.value() << std::endl;
+
+	std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
+	std::set<uint32_t> uniqueFamilies = { indices.graphicsFamily.value(), indices.presentFamily.value() };
+
+	float queuePriority = 1.0f;
+	for (uint32_t queueFamily : uniqueFamilies)
+	{
+		VkDeviceQueueCreateInfo queueCreateInfo{};
+		queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+		queueCreateInfo.queueFamilyIndex = queueFamily;
+		queueCreateInfo.queueCount = 1;
+		queueCreateInfo.pQueuePriorities = &queuePriority;
+
+		queueCreateInfos.push_back(queueCreateInfo);
+	}
+
+	VkDeviceCreateInfo createInfo{};
+	createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+	createInfo.queueCreateInfoCount = (uint32_t)queueCreateInfos.size();
+	createInfo.pQueueCreateInfos = queueCreateInfos.data();
+
+	VK_CHECK(vkCreateDevice(vkCtx_.physicalDevice, &createInfo, nullptr, &vkCtx_.device));
+
+	vkGetDeviceQueue(vkCtx_.device, indices.graphicsFamily.value(), 0, &vkCtx_.graphicsQueue);
+	vkGetDeviceQueue(vkCtx_.device, indices.presentFamily.value(), 0, &vkCtx_.presentQueue);
 }
