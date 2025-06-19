@@ -1,14 +1,21 @@
-#include <iostream>
-#include <GLFW/glfw3.h>
 #include "VulkanContext.hpp"
+#include "Window.hpp"
 #include "VulkanInstance.hpp"
 
-VulkanInstance::VulkanInstance(VulkanContext& ctx) : vkCtx_(ctx)
+#include <iostream>
+#include <cstring>
+
+VulkanInstance::VulkanInstance(VulkanContext& ctx, Window& window) : vkCtx_(ctx), window_(window)
 {
 	createInstance();
+	createSurface();
 }
 VulkanInstance::~VulkanInstance() noexcept
 {
+	if (vkCtx_.surface != VK_NULL_HANDLE)
+	{
+		vkDestroySurfaceKHR(vkCtx_.instance, vkCtx_.surface, nullptr);
+	}
 	if (vkCtx_.instance != VK_NULL_HANDLE)
 	{
 		vkDestroyInstance(vkCtx_.instance, nullptr);
@@ -56,6 +63,12 @@ void VulkanInstance::createInstance()
 	}
 
 	VK_CHECK(vkCreateInstance(&createInfo, nullptr, &vkCtx_.instance));
+}
+
+void VulkanInstance::createSurface()
+{
+	GLFWwindow* glfwWindow = window_.getWindow();
+	VK_CHECK(glfwCreateWindowSurface(vkCtx_.instance, glfwWindow, nullptr, &vkCtx_.surface));
 }
 
 bool VulkanInstance::checkValidationLayer()
