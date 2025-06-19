@@ -10,7 +10,7 @@ int main()
 		Window window(800, 600, "test window");
 		
 		VulkanContext ctx;
-		VulkanInstance vulkanInstance(ctx);
+		VulkanInstance vulkanInstance(ctx, window);
 		VulkanDevice vulkanDevice(ctx);
 
 		GLFWwindow* glfwWindow = window.getWindow();
