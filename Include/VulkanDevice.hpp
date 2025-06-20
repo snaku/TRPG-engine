@@ -26,5 +26,7 @@ private:
 	bool isDeviceSuitable(VkPhysicalDevice device);
 	QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
 	void createLogicalDevice();
+	void createCommandPool();
+
 	VulkanContext& vkCtx_;
 };

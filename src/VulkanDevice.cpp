@@ -8,6 +8,7 @@ VulkanDevice::VulkanDevice(VulkanContext& ctx) : vkCtx_(ctx)
 {
 	pickPhysicalDevice();
 	createLogicalDevice();
+	createCommandPool();
 }
 VulkanDevice::~VulkanDevice() noexcept
 {
@@ -123,4 +124,16 @@ void VulkanDevice::createLogicalDevice()
 
 	vkGetDeviceQueue(vkCtx_.device, indices.graphicsFamily.value(), 0, &vkCtx_.graphicsQueue);
 	vkGetDeviceQueue(vkCtx_.device, indices.presentFamily.value(), 0, &vkCtx_.presentQueue);
+}
+
+void VulkanDevice::createCommandPool()
+{
+	QueueFamilyIndices indices = findQueueFamilies(vkCtx_.physicalDevice);
+
+	VkCommandPoolCreateInfo createInfo{};
+	createInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+	createInfo.queueFamilyIndex = indices.graphicsFamily.value();
+	createInfo.flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT;
+
+	VK_CHECK(vkCreateCommandPool(vkCtx_.device, &createInfo, nullptr, &vkCtx_.commandPool));
 }
