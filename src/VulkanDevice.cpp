@@ -12,13 +12,13 @@ VulkanDevice::VulkanDevice(VulkanContext& ctx) : vkCtx_(ctx)
 }
 VulkanDevice::~VulkanDevice() noexcept
 {
-	if (vkCtx_.device != VK_NULL_HANDLE)
-	{
-		vkDestroyDevice(vkCtx_.device, nullptr);
-	}
 	if (vkCtx_.commandPool != VK_NULL_HANDLE)
 	{
 		vkDestroyCommandPool(vkCtx_.device, vkCtx_.commandPool, nullptr);
+	}
+	if (vkCtx_.device != VK_NULL_HANDLE)
+	{
+		vkDestroyDevice(vkCtx_.device, nullptr);
 	}
 }
 
