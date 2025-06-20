@@ -43,7 +43,7 @@ void VulkanInstance::createInstance()
 	createInfo.enabledExtensionCount = glfwExtCount;
 	createInfo.ppEnabledExtensionNames = glfwExt;
 
-#ifdef _DEBUG
+#ifdef DEBUG
 	vkCtx_.enableValidationLayers = true;
 	vkCtx_.validationLayers.push_back("VK_LAYER_KHRONOS_validation");
 #else
