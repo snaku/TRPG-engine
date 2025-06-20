@@ -16,6 +16,10 @@ VulkanDevice::~VulkanDevice() noexcept
 	{
 		vkDestroyDevice(vkCtx_.device, nullptr);
 	}
+	if (vkCtx_.commandPool != VK_NULL_HANDLE)
+	{
+		vkDestroyCommandPool(vkCtx_.device, vkCtx_.commandPool, nullptr);
+	}
 }
 
 void VulkanDevice::pickPhysicalDevice()
