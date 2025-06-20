@@ -1,6 +1,7 @@
 #pragma once
 
 #include <optional>
+#include <vector>
 
 struct VulkanContext;
 
@@ -23,10 +24,12 @@ public:
 
 private:
 	void pickPhysicalDevice();
+	bool checkDeviceExtensionSupport(VkPhysicalDevice device);
 	bool isDeviceSuitable(VkPhysicalDevice device);
 	QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
 	void createLogicalDevice();
 	void createCommandPool();
 
 	VulkanContext& vkCtx_;
+	std::vector<const char*> deviceExtension_{VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 };
