@@ -7,7 +7,7 @@ VulkanPipeline::VulkanPipeline(VulkanContext& ctx) : vkCtx_(ctx)
 {
     createPipeline();
 }
-VulkanPipeline::~VulkanPipeline()
+VulkanPipeline::~VulkanPipeline() noexcept
 {
 
 }
