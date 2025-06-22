@@ -14,7 +14,7 @@ int main()
 		VulkanContext ctx;
 		VulkanInstance vulkanInstance(ctx, window);
 		VulkanDevice vulkanDevice(ctx);
-		VulkanSwapchain swapchain(ctx, vulkanDevice);
+		VulkanSwapchain swapchain(ctx, vulkanDevice, window);
 		VulkanPipeline vulkanPipeline(ctx);
 
 		GLFWwindow* glfwWindow = window.getWindow();
