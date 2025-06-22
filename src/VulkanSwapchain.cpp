@@ -1,12 +1,14 @@
 #include "../Include/VulkanContext.hpp"
+#include "../Include/Window.hpp"
 #include "../Include/VulkanSwapchain.hpp"
 #include "../Include/VulkanDevice.hpp"
 
 #include <array>
+#include <algorithm>
 
-VulkanSwapchain::VulkanSwapchain(VulkanContext& ctx, const VulkanDevice& vkDevice) : vkCtx_(ctx)
+VulkanSwapchain::VulkanSwapchain(VulkanContext& ctx, const VulkanDevice& vkDevice, const Window& window) : vkCtx_(ctx)
 {
-    createSwapchain(vkDevice);
+    createSwapchain(vkDevice, window); 
 }
 VulkanSwapchain::~VulkanSwapchain() noexcept
 {
@@ -66,18 +68,48 @@ VkSurfaceFormatKHR VulkanSwapchain::pickFormat(VkPhysicalDevice device, VkSurfac
     return availableFormats[0];
 }
 
-VulkanSwapchain::SwapchainDetails VulkanSwapchain::chooseSwapchainSettings(VkPhysicalDevice device, VkSurfaceKHR surface)
+VkExtent2D VulkanSwapchain::pickSwapchainExtent(const VkSurfaceCapabilitiesKHR& capabilites,
+                                                uint32_t width,
+                                                uint32_t height)
+{
+    if (capabilites.currentExtent.width != UINT32_MAX)
+        return capabilites.currentExtent;
+
+    VkExtent2D actual { width, height };
+    actual.width = std::clamp(actual.width,
+                            capabilites.minImageExtent.width,
+                            capabilites.maxImageExtent.width);
+
+    actual.height = std::clamp(actual.height,
+                            capabilites.minImageExtent.height,
+                            capabilites.maxImageExtent.height);
+
+    return actual;
+}
+
+VulkanSwapchain::SwapchainDetails VulkanSwapchain::chooseSwapchainSettings(VkPhysicalDevice device, VkSurfaceKHR surface, uint32_t width, uint32_t height)
 {
     SwapchainDetails details;
     details.presentMode = pickPresentMode(device, surface);
     details.format = pickFormat(device, surface);
 
+    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, surface, &details.capabilities);
+
+    details.extent = pickSwapchainExtent(details.capabilities, width, height);
+
+    details.minImageCount = details.capabilities.minImageCount + 1;
+
+    if (details.capabilities.maxImageCount > 0 && details.minImageCount > details.capabilities.maxImageCount)
+        details.minImageCount = details.capabilities.maxImageCount;
+
     return details;
 }
 
-void VulkanSwapchain::createSwapchain(const VulkanDevice& vkDevice)
+void VulkanSwapchain::createSwapchain(const VulkanDevice& vkDevice, const Window& window)
 {
-    SwapchainDetails details = chooseSwapchainSettings(vkCtx_.physicalDevice, vkCtx_.surface);
+    uint32_t height = window.getHeight();
+    uint32_t width = window.getWidth();
+    SwapchainDetails details = chooseSwapchainSettings(vkCtx_.physicalDevice, vkCtx_.surface, width, height);
 
     VkSwapchainCreateInfoKHR createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
@@ -85,7 +117,14 @@ void VulkanSwapchain::createSwapchain(const VulkanDevice& vkDevice)
     createInfo.imageFormat = details.format.format;
     createInfo.imageColorSpace = details.format.colorSpace;
     createInfo.presentMode = details.presentMode;
-    createInfo.imageExtent = details.capabilities.currentExtent;
+    createInfo.imageExtent = details.extent;
+    createInfo.minImageCount = details.minImageCount;
+    createInfo.imageArrayLayers = 1;
+    createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+    createInfo.preTransform = details.capabilities.currentTransform;
+    createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+    createInfo.clipped = VK_TRUE;
+    createInfo.oldSwapchain = VK_NULL_HANDLE; // not for now
 
     std::array<uint32_t, 2> queueFamilyIndices{vkDevice.getGraphicsFamilyIndices(), vkDevice.getPresentFamilyIndices()};
 
@@ -99,4 +138,6 @@ void VulkanSwapchain::createSwapchain(const VulkanDevice& vkDevice)
     {
         createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
     }
+
+    VK_CHECK(vkCreateSwapchainKHR(vkCtx_.device, &createInfo, nullptr, &vkCtx_.swapchain));
 }

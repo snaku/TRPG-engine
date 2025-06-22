@@ -3,26 +3,32 @@
 #include "vulkan/vulkan.h"
 
 struct VulkanContext;
+class Window;
 class VulkanDevice;
 
 class VulkanSwapchain
 {
 public:
-    VulkanSwapchain(VulkanContext& ctx, const VulkanDevice& vkDevice);
+    VulkanSwapchain(VulkanContext& ctx, const VulkanDevice& vkDevice, const Window& window);
     ~VulkanSwapchain() noexcept;
 
 private:
     struct SwapchainDetails
     {
         VkSurfaceCapabilitiesKHR capabilities;
+        VkExtent2D extent;
         VkSurfaceFormatKHR format;
         VkPresentModeKHR presentMode;
+        uint32_t minImageCount;
     };
 
     static VkPresentModeKHR pickPresentMode(VkPhysicalDevice device, VkSurfaceKHR surface);
     static VkSurfaceFormatKHR pickFormat(VkPhysicalDevice device, VkSurfaceKHR surface);
-    SwapchainDetails chooseSwapchainSettings(VkPhysicalDevice device, VkSurfaceKHR surface);
-    void createSwapchain(const VulkanDevice& vkDevice);
+    static VkExtent2D pickSwapchainExtent(const VkSurfaceCapabilitiesKHR& capabilites, uint32_t width, uint32_t height);
+    
+    SwapchainDetails chooseSwapchainSettings(VkPhysicalDevice device, VkSurfaceKHR surface, uint32_t width, uint32_t height);
+    
+    void createSwapchain(const VulkanDevice& vkDevice, const Window& window);
 
     VulkanContext& vkCtx_;
 };
