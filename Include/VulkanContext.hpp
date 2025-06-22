@@ -22,6 +22,8 @@ struct VulkanContext
 	VkQueue graphicsQueue = VK_NULL_HANDLE;
 	VkQueue presentQueue = VK_NULL_HANDLE;
 
+	VkSwapchainKHR swapchain = VK_NULL_HANDLE;
+
 	VkCommandPool commandPool = VK_NULL_HANDLE;
 
 	// validation layers
