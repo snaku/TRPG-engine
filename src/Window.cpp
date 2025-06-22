@@ -1,6 +1,6 @@
 #include "../Include/Window.hpp"
 
-Window::Window(int w, int h, const std::string& t) : width_(w), height_(h), title_(t)
+Window::Window(uint32_t w, uint32_t h, const std::string& t) : width_(w), height_(h), title_(t)
 {
 	if (!createWindow())
 	{
