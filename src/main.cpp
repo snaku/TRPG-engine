@@ -2,6 +2,7 @@
 #include "../Include/VulkanContext.hpp"
 #include "../Include/VulkanInstance.hpp"
 #include "../Include/VulkanDevice.hpp"
+#include "../Include/VulkanSwapchain.hpp"
 #include "../Include/VulkanPipeline.hpp"
 
 int main()
@@ -13,6 +14,7 @@ int main()
 		VulkanContext ctx;
 		VulkanInstance vulkanInstance(ctx, window);
 		VulkanDevice vulkanDevice(ctx);
+		VulkanSwapchain swapchain(ctx, vulkanDevice);
 		VulkanPipeline vulkanPipeline(ctx);
 
 		GLFWwindow* glfwWindow = window.getWindow();
