@@ -1,7 +1,7 @@
 #pragma once
 
-#include <optional>
 #include <vector>
+#include <optional>
 
 struct VulkanContext;
 
@@ -11,6 +11,10 @@ public:
 	explicit VulkanDevice(VulkanContext& ctx);
 	~VulkanDevice() noexcept;
 
+	uint32_t getGraphicsFamilyIndices() const { return indices_.graphicsFamily.value(); }
+	uint32_t getPresentFamilyIndices() const { return indices_.presentFamily.value(); }
+
+private: 
 	struct QueueFamilyIndices
 	{
 		std::optional<uint32_t> graphicsFamily;
@@ -20,9 +24,8 @@ public:
 		{
 			return graphicsFamily.has_value() && presentFamily.has_value();
 		}
-	};
+	};	
 
-private:
 	void pickPhysicalDevice();
 	bool checkDeviceExtensionSupport(VkPhysicalDevice device);
 	bool isDeviceSuitable(VkPhysicalDevice device);
@@ -31,5 +34,6 @@ private:
 	void createCommandPool();
 
 	VulkanContext& vkCtx_;
+	QueueFamilyIndices indices_;
 	std::vector<const char*> deviceExtension_{VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 };

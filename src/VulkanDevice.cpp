@@ -8,6 +8,7 @@
 VulkanDevice::VulkanDevice(VulkanContext& ctx) : vkCtx_(ctx)
 {
 	pickPhysicalDevice();
+	indices_ = findQueueFamilies(vkCtx_.physicalDevice);
 	createLogicalDevice();
 	createCommandPool();
 }
@@ -131,13 +132,11 @@ VulkanDevice::QueueFamilyIndices VulkanDevice::findQueueFamilies(VkPhysicalDevic
 
 void VulkanDevice::createLogicalDevice()
 {
-	QueueFamilyIndices indices = findQueueFamilies(vkCtx_.physicalDevice);
-
-	std::cout << "gfx queue index: " << indices.graphicsFamily.value() <<
-		"\npresent queue index: " << indices.presentFamily.value() << std::endl;
+	std::cout << "gfx queue index: " << indices_.graphicsFamily.value() <<
+		"\npresent queue index: " << indices_.presentFamily.value() << std::endl;
 
 	std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
-	std::set<uint32_t> uniqueFamilies = { indices.graphicsFamily.value(), indices.presentFamily.value() };
+	std::set<uint32_t> uniqueFamilies = { indices_.graphicsFamily.value(), indices_.presentFamily.value() };
 
 	float queuePriority = 1.0f;
 	for (uint32_t queueFamily : uniqueFamilies)
@@ -160,17 +159,15 @@ void VulkanDevice::createLogicalDevice()
 
 	VK_CHECK(vkCreateDevice(vkCtx_.physicalDevice, &createInfo, nullptr, &vkCtx_.device));
 
-	vkGetDeviceQueue(vkCtx_.device, indices.graphicsFamily.value(), 0, &vkCtx_.graphicsQueue);
-	vkGetDeviceQueue(vkCtx_.device, indices.presentFamily.value(), 0, &vkCtx_.presentQueue);
+	vkGetDeviceQueue(vkCtx_.device, indices_.graphicsFamily.value(), 0, &vkCtx_.graphicsQueue);
+	vkGetDeviceQueue(vkCtx_.device, indices_.presentFamily.value(), 0, &vkCtx_.presentQueue);
 }
 
 void VulkanDevice::createCommandPool()
 {
-	QueueFamilyIndices indices = findQueueFamilies(vkCtx_.physicalDevice);
-
 	VkCommandPoolCreateInfo createInfo{};
 	createInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-	createInfo.queueFamilyIndex = indices.graphicsFamily.value();
+	createInfo.queueFamilyIndex = indices_.graphicsFamily.value();
 	createInfo.flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT;
 
 	VK_CHECK(vkCreateCommandPool(vkCtx_.device, &createInfo, nullptr, &vkCtx_.commandPool));
