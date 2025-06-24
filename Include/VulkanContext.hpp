@@ -23,6 +23,8 @@ struct VulkanContext
 	VkQueue presentQueue = VK_NULL_HANDLE;
 
 	VkSwapchainKHR swapchain = VK_NULL_HANDLE;
+	std::vector<VkImage> swapchainImages;
+	std::vector<VkImageView> swapchainImageViews;
 
 	VkCommandPool commandPool = VK_NULL_HANDLE;
 
