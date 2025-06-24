@@ -29,6 +29,7 @@ private:
     SwapchainDetails chooseSwapchainSettings(VkPhysicalDevice device, VkSurfaceKHR surface, uint32_t width, uint32_t height);
     
     void createSwapchain(const VulkanDevice& vkDevice, const Window& window);
+    void createImageViews(VkFormat format);
 
     VulkanContext& vkCtx_;
 };
