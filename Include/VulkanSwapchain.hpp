@@ -12,6 +12,9 @@ public:
     VulkanSwapchain(VulkanContext& ctx, const VulkanDevice& vkDevice, const Window& window);
     ~VulkanSwapchain() noexcept;
 
+    VkFormat getFormat() const { return format_; }
+    VkExtent2D getExtent() const { return extent_; }
+
 private:
     struct SwapchainDetails
     {
@@ -32,4 +35,6 @@ private:
     void createImageViews(VkFormat format);
 
     VulkanContext& vkCtx_;
+    VkFormat format_;
+    VkExtent2D extent_;
 };

@@ -106,6 +106,9 @@ VulkanSwapchain::SwapchainDetails VulkanSwapchain::chooseSwapchainSettings(VkPhy
     if (details.capabilities.maxImageCount > 0 && details.minImageCount > details.capabilities.maxImageCount)
         details.minImageCount = details.capabilities.maxImageCount;
 
+    format_ = details.format.format;
+    extent_ = details.extent;
+
     return details;
 }
 
