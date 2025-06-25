@@ -28,6 +28,8 @@ struct VulkanContext
 
 	VkCommandPool commandPool = VK_NULL_HANDLE;
 
+	VkRenderPass renderPass = VK_NULL_HANDLE;
+
 	// validation layers
 	std::vector<const char*> validationLayers;
 	bool enableValidationLayers;
