@@ -3,6 +3,7 @@
 #include "../Include/VulkanInstance.hpp"
 #include "../Include/VulkanDevice.hpp"
 #include "../Include/VulkanSwapchain.hpp"
+#include "../Include/VulkanRenderPass.hpp"
 #include "../Include/VulkanPipeline.hpp"
 
 int main()
@@ -15,6 +16,7 @@ int main()
 		VulkanInstance vulkanInstance(ctx, window);
 		VulkanDevice vulkanDevice(ctx);
 		VulkanSwapchain swapchain(ctx, vulkanDevice, window);
+		VulkanRenderPass renderPass(ctx, swapchain);
 		VulkanPipeline vulkanPipeline(ctx);
 
 		GLFWwindow* glfwWindow = window.getWindow();
