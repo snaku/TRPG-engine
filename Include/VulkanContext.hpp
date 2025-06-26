@@ -30,6 +30,10 @@ struct VulkanContext
 
 	VkRenderPass renderPass = VK_NULL_HANDLE;
 
+	// pipeline
+	VkPipeline pipeline = VK_NULL_HANDLE;
+	VkPipelineLayout pipelineLayout = VK_NULL_HANDLE;
+
 	// validation layers
 	std::vector<const char*> validationLayers;
 	bool enableValidationLayers;
