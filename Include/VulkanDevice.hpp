@@ -14,6 +14,8 @@ public:
 	uint32_t getGraphicsFamilyIndices() const { return indices_.graphicsFamily.value(); }
 	uint32_t getPresentFamilyIndices() const { return indices_.presentFamily.value(); }
 
+
+
 private: 
 	struct QueueFamilyIndices
 	{
@@ -26,12 +28,11 @@ private:
 		}
 	};	
 
-	void pickPhysicalDevice();
 	bool checkDeviceExtensionSupport(VkPhysicalDevice device);
 	bool isDeviceSuitable(VkPhysicalDevice device);
-	QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
+	void pickPhysicalDevice();
 	void createLogicalDevice();
-	void createCommandPool();
+	QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
 
 	VulkanContext& vkCtx_;
 	QueueFamilyIndices indices_;
