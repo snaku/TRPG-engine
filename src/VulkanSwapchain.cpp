@@ -8,7 +8,7 @@
 
 VulkanSwapchain::VulkanSwapchain(VulkanContext& ctx, const VulkanDevice& vkDevice, const Window& window) : vkCtx_(ctx)
 {
-    createSwapchain(vkDevice, window); // calls createImageViews
+    createSwapchain(vkDevice, window);
 }
 VulkanSwapchain::~VulkanSwapchain() noexcept
 {
@@ -36,15 +36,16 @@ VkPresentModeKHR VulkanSwapchain::pickPresentMode(VkPhysicalDevice device, VkSur
     std::vector<VkPresentModeKHR> presentModes(presentModeCount);
     vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount, presentModes.data());
 
-    for (const auto& mode : presentModes)
+    // GPU is at almost 100% when using VK_PRESENT_MODE_MAILBOX_KHR 
+    /*for (const auto& mode : presentModes)
     {
         if (mode == VK_PRESENT_MODE_MAILBOX_KHR)
         {
-            return VK_PRESENT_MODE_MAILBOX_KHR;
+            return VK_PRESENT_MODE_FIFO_KHR;
         }
-    }
+    }*/
 
-    // if we can't have VK_PRESENT_MODE_MAILBOX_KHR
+    // if we can't have VK_PRESENT_MODE_MAILBOX_KHR (also it's always available)
     return VK_PRESENT_MODE_FIFO_KHR;
 }
 
@@ -132,7 +133,9 @@ void VulkanSwapchain::createSwapchain(const VulkanDevice& vkDevice, const Window
     createInfo.preTransform = details.capabilities.currentTransform;
     createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
     createInfo.clipped = VK_TRUE;
-    createInfo.oldSwapchain = VK_NULL_HANDLE; // not for now
+    
+    // TODO: handle window resize
+    createInfo.oldSwapchain = VK_NULL_HANDLE;
 
     std::array<uint32_t, 2> queueFamilyIndices{vkDevice.getGraphicsFamilyIndices(), vkDevice.getPresentFamilyIndices()};
 

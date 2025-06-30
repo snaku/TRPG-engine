@@ -12,6 +12,7 @@ public:
     VulkanSwapchain(VulkanContext& ctx, const VulkanDevice& vkDevice, const Window& window);
     ~VulkanSwapchain() noexcept;
 
+    // getters
     VkFormat getFormat() const { return format_; }
     VkExtent2D getExtent() const { return extent_; }
 
