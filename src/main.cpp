@@ -1,28 +1,24 @@
-#include "../Include/Window.hpp"
-#include "../Include/VulkanContext.hpp"
-#include "../Include/VulkanInstance.hpp"
-#include "../Include/VulkanDevice.hpp"
-#include "../Include/VulkanSwapchain.hpp"
-#include "../Include/VulkanRenderPass.hpp"
-#include "../Include/VulkanPipeline.hpp"
+#include "../Include/Engine.hpp"
+
+#include <iostream>
 
 int main()
 {
+	if (!engine::initWindow(800, 600, "Vulkan"))
+	{
+		return -1;
+	}
+	
 	try 
 	{
-		Window window(800, 600, "test window");
-		
-		VulkanContext ctx;
-		VulkanInstance vulkanInstance(ctx, window);
-		VulkanDevice vulkanDevice(ctx);
-		VulkanSwapchain swapchain(ctx, vulkanDevice, window);
-		VulkanRenderPass renderPass(ctx, swapchain);
-		VulkanPipeline vulkanPipeline(ctx);
+		engine::initEngine();
+		engine::createPipeline("shaders/vert.spv", "shaders/frag.spv");
+		engine::prepareRender();
 
-		GLFWwindow* glfwWindow = window.getWindow();
-		while (!glfwWindowShouldClose(glfwWindow))
+		while (!engine::windowShouldClose())
 		{
-			glfwPollEvents();
+			engine::pollEvents();
+			engine::render();
 		}
 	}
 	catch (const std::exception& e)
