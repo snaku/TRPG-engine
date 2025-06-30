@@ -1,25 +1,22 @@
 #include "../Include/Window.hpp"
 
-Window::Window(uint32_t w, uint32_t h, const std::string& t) : width_(w), height_(h), title_(t)
-{
-	if (!createWindow())
-	{
-		throw std::runtime_error("createWindow error !");
-	}
-}
 Window::~Window() noexcept
 {
 	if (window_) glfwDestroyWindow(window_);
 	glfwTerminate();
 }
 
-bool Window::createWindow()
+bool Window::createWindow(uint32_t width, uint32_t height, const std::string& title)
 {
 	if (!glfwInit())
 	{
 		std::cerr << "Error glfw init\n";
 		return false;
 	}
+
+	width_ = width;
+	height_ = height;
+	title_ = title;
 
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE); // later
@@ -33,4 +30,14 @@ bool Window::createWindow()
 	}
 
 	return true;
+}
+
+bool Window::windowShouldClose()
+{
+	return glfwWindowShouldClose(window_);
+}
+
+void Window::pollEvents()
+{
+	glfwPollEvents();
 }
