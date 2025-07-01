@@ -4,11 +4,18 @@
 
 #include <iostream>
 
-VulkanMesh::VulkanMesh(VulkanContext& ctx, const VulkanSwapchain& vkSwapchain, std::vector<Vertex> vertices) 
+VulkanMesh::VulkanMesh(VulkanContext& ctx, const VulkanSwapchain& vkSwapchain, const std::vector<Vertex> vertices) 
     : vkCtx_(ctx), vkSwapchain_(vkSwapchain), vertices_(std::move(vertices))
 {
-    createVertexBuffer();
-    createbuffer();
+    VkDeviceSize vertexBufferSize = sizeof(vertices_[0]) * vertices_.size();
+    VkDeviceSize uniformBufferSize = sizeof(UniformBufferObject);
+
+    // create vertex buffer
+    createBuffer(vertexBufferSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, vertexBuffer_, vertexBufferMemory_);
+    vertexBufferMapMemory();
+
+    // create uniform buffer
+    createBuffer(uniformBufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, uniformBuffer_, uniformBufferMemory_);
 }
 VulkanMesh::~VulkanMesh() noexcept
 {
@@ -21,59 +28,37 @@ VulkanMesh::~VulkanMesh() noexcept
     vkFreeMemory(vkCtx_.device, uniformBufferMemory_, nullptr);
 }
 
-void VulkanMesh::createVertexBuffer()
+void VulkanMesh::createBuffer(VkDeviceSize bufferSize, VkBufferUsageFlags usage, VkBuffer& buffer, VkDeviceMemory& bufferMemory)
 {
     VkBufferCreateInfo bufferInfo{};
     bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-    bufferInfo.size = sizeof(vertices_[0]) * vertices_.size();
-    bufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+    bufferInfo.usage = usage;
+    bufferInfo.size = bufferSize;
     bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-    VK_CHECK(vkCreateBuffer(vkCtx_.device, &bufferInfo, nullptr, &vertexBuffer_));
+    VK_CHECK(vkCreateBuffer(vkCtx_.device, &bufferInfo, nullptr, &buffer));
 
     VkMemoryRequirements memRequirements;
-    vkGetBufferMemoryRequirements(vkCtx_.device, vertexBuffer_, &memRequirements);
+    vkGetBufferMemoryRequirements(vkCtx_.device, buffer, &memRequirements);
 
     VkMemoryAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
     allocInfo.allocationSize = memRequirements.size;
     allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
-    VK_CHECK(vkAllocateMemory(vkCtx_.device, &allocInfo, nullptr, &vertexBufferMemory_));
+    VK_CHECK(vkAllocateMemory(vkCtx_.device, &allocInfo, nullptr, &bufferMemory));
 
-    vkBindBufferMemory(vkCtx_.device, vertexBuffer_, vertexBufferMemory_, 0);
-
-    void* data;
-    vkMapMemory(vkCtx_.device, vertexBufferMemory_, 0, bufferInfo.size, 0, &data);
-    std::cout << "vertices size: " << vertices_.size() << std::endl;
-    memcpy(data, vertices_.data(), (size_t)bufferInfo.size);
-    vkUnmapMemory(vkCtx_.device, vertexBufferMemory_);
+    vkBindBufferMemory(vkCtx_.device, buffer, bufferMemory, 0);
 }
 
-void VulkanMesh::createbuffer()
+void VulkanMesh::vertexBufferMapMemory()
 {
-    VkDeviceSize bufferSize = sizeof(UniformBufferObject);
+    VkDeviceSize vertexBufferSize = sizeof(vertices_[0]) * vertices_.size();
 
-    VkBufferCreateInfo bufferInfo{};
-    bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-    bufferInfo.size = bufferSize;
-    bufferInfo.usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
-    bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-
-    VK_CHECK(vkCreateBuffer(vkCtx_.device, &bufferInfo, nullptr, &uniformBuffer_));
-
-    VkMemoryRequirements memRequirements;
-    vkGetBufferMemoryRequirements(vkCtx_.device, uniformBuffer_, &memRequirements);
-
-    VkMemoryAllocateInfo allocInfo{};
-    allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-    allocInfo.allocationSize = memRequirements.size;
-    allocInfo.memoryTypeIndex = findMemoryType(
-        memRequirements.memoryTypeBits,
-        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-
-    VK_CHECK(vkAllocateMemory(vkCtx_.device, &allocInfo, nullptr, &uniformBufferMemory_));
-    vkBindBufferMemory(vkCtx_.device, uniformBuffer_, uniformBufferMemory_, 0);
+    void* data;
+    vkMapMemory(vkCtx_.device, vertexBufferMemory_, 0, vertexBufferSize, 0, &data);
+    memcpy(data, vertices_.data(), vertexBufferSize);
+    vkUnmapMemory(vkCtx_.device, vertexBufferMemory_);
 }
 
 uint32_t VulkanMesh::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
@@ -122,7 +107,6 @@ void VulkanMesh::updateUniformBuffer(float deltaTime)
         }
     }*/
 
-    
 
     float radius = 2.0f;
     static float angle = 0.0f;
@@ -133,8 +117,9 @@ void VulkanMesh::updateUniformBuffer(float deltaTime)
 
     ubo.model = glm::mat4(1.0f);
 
+    // glm::vec3(2.0f, 2.0f, 1.0f)
     ubo.view = glm::lookAt(
-        glm::vec3(camX, camY, 8.0f),
+        glm::vec3(camX, camY, 1.0f),
         glm::vec3(0.0f, 0.0f, 0.0f),
         glm::vec3(0.0f, 0.0f, 1.0f)
     );
@@ -143,9 +128,9 @@ void VulkanMesh::updateUniformBuffer(float deltaTime)
         glm::radians(45.0f),
         vkSwapchain_.getExtent().width / (float)vkSwapchain_.getExtent().height,
         0.1f,
-        10.f
+        100.0f
     );
-    // ubo.proj[1][1] *= -1;
+    ubo.proj[1][1] *= -1;
 
     /*static float scale = 0.25f;
     static bool isIncreasing = true;

@@ -14,11 +14,12 @@ class VulkanMesh
 {
 public:
     VulkanMesh(VulkanContext& ctx, const VulkanSwapchain& vkSwapchain,
-               std::vector<Vertex> vertices);
+               const std::vector<Vertex> vertices);
     ~VulkanMesh() noexcept;
 
-    void createVertexBuffer();
-    void createbuffer();
+    void createBuffer(VkDeviceSize bufferSize, VkBufferUsageFlags usage, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
+    void vertexBufferMapMemory();
+    
     uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 
     void updateUniformBuffer(float deltaTime);
@@ -26,13 +27,8 @@ public:
     VkBuffer getVertexBuffer() const { return vertexBuffer_; }
     VkBuffer getUniformBuffer() const { return uniformBuffer_; }
     size_t getVerticesSize() const { return vertices_.size(); }
+
 private:
-    /*const std::vector<Vertex> vertices_ = 
-    {
-        {{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-        {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
-        {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
-    };*/
     std::vector<Vertex> vertices_;
     VkBuffer vertexBuffer_ = VK_NULL_HANDLE;
     VkBuffer uniformBuffer_ = VK_NULL_HANDLE;
