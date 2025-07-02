@@ -4,18 +4,24 @@
 
 #include <iostream>
 
-VulkanMesh::VulkanMesh(VulkanContext& ctx, const VulkanSwapchain& vkSwapchain, const std::vector<Vertex> vertices) 
+VulkanMesh::VulkanMesh(VulkanContext& ctx, const VulkanSwapchain& vkSwapchain, const std::vector<Vertex>& vertices) 
     : vkCtx_(ctx), vkSwapchain_(vkSwapchain), vertices_(std::move(vertices))
 {
     VkDeviceSize vertexBufferSize = sizeof(vertices_[0]) * vertices_.size();
     VkDeviceSize uniformBufferSize = sizeof(UniformBufferObject);
-
+    
     // create vertex buffer
     createBuffer(vertexBufferSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, vertexBuffer_, vertexBufferMemory_);
-    vertexBufferMapMemory();
+    
+    void* vertexBufferMap = nullptr;
+    vkMapMemory(vkCtx_.device, vertexBufferMemory_, 0, vertexBufferSize, 0, &vertexBufferMap);
+    memcpy(vertexBufferMap, vertices_.data(), vertexBufferSize);
+    vkUnmapMemory(vkCtx_.device, vertexBufferMemory_);
+    vertexBufferMap = nullptr;
 
     // create uniform buffer
     createBuffer(uniformBufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, uniformBuffer_, uniformBufferMemory_);
+    vkMapMemory(vkCtx_.device, uniformBufferMemory_, 0, uniformBufferSize, 0, &uniformBufferMap_);
 }
 VulkanMesh::~VulkanMesh() noexcept
 {
@@ -25,6 +31,7 @@ VulkanMesh::~VulkanMesh() noexcept
 
     // uniform buffer
     vkDestroyBuffer(vkCtx_.device, uniformBuffer_, nullptr);
+    vkUnmapMemory(vkCtx_.device, uniformBufferMemory_);
     vkFreeMemory(vkCtx_.device, uniformBufferMemory_, nullptr);
 }
 
@@ -49,16 +56,6 @@ void VulkanMesh::createBuffer(VkDeviceSize bufferSize, VkBufferUsageFlags usage,
     VK_CHECK(vkAllocateMemory(vkCtx_.device, &allocInfo, nullptr, &bufferMemory));
 
     vkBindBufferMemory(vkCtx_.device, buffer, bufferMemory, 0);
-}
-
-void VulkanMesh::vertexBufferMapMemory()
-{
-    VkDeviceSize vertexBufferSize = sizeof(vertices_[0]) * vertices_.size();
-
-    void* data;
-    vkMapMemory(vkCtx_.device, vertexBufferMemory_, 0, vertexBufferSize, 0, &data);
-    memcpy(data, vertices_.data(), vertexBufferSize);
-    vkUnmapMemory(vkCtx_.device, vertexBufferMemory_);
 }
 
 uint32_t VulkanMesh::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
@@ -147,8 +144,5 @@ void VulkanMesh::updateUniformBuffer(float deltaTime)
 
     ubo.model = glm::scale(glm::mat4(1.0f), glm::vec3(scale, scale, scale));*/
 
-    void* data;
-    vkMapMemory(vkCtx_.device, uniformBufferMemory_, 0, sizeof(ubo), 0, &data);
-    memcpy(data, &ubo, sizeof(ubo));
-    vkUnmapMemory(vkCtx_.device, uniformBufferMemory_);
+    memcpy(uniformBufferMap_, &ubo, sizeof(ubo));
 }
