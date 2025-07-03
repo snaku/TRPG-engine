@@ -45,11 +45,6 @@ struct VulkanContext
 	VkDescriptorSetLayout descriptorSetLayout = VK_NULL_HANDLE;
 	VkDescriptorSet descriptorSet;
 
-	VkBuffer vertexBuffer; // temporary
-	VkBuffer uniformBuffer; // temporary
-	VkDeviceMemory vertexBufferMemory;
-	VkDeviceMemory uniformBufferMemory;
-
 	// validation layers
 	std::vector<const char*> validationLayers;
 	bool enableValidationLayers;
