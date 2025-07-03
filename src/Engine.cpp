@@ -42,19 +42,16 @@ namespace engine
         vkSwapchain = std::make_unique<VulkanSwapchain>(ctx, *vkDevice, window);
         vkRenderPass = std::make_unique<VulkanRenderPass>(ctx, *vkSwapchain);
 
-        vkMeshes.emplace_back(std::make_unique<VulkanMesh>(ctx, *vkSwapchain, std::vector<Vertex>
+        std::vector<Vertex> vertices = 
         {
-            {{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-            {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
-            {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
-        }));
-
-        vkMeshes.emplace_back(std::make_unique<VulkanMesh>(ctx, *vkSwapchain, std::vector<Vertex>
-        {
-            {{0.0f, -0.25f}, {1.0f, 1.0f, 0.0f}},
-            {{0.25f, 0.25f}, {1.0f, 0.0f, 1.0f}},
-            {{-0.25f, 0.25f}, {0.0f, 1.0f, 1.0f}}
-        }));
+            {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}}, // 0
+            {{0.0f, 0.5f},   {0.0f, 1.0f, 0.0f}}, // 1
+            {{0.5f, -0.5f},  {0.0f, 0.0f, 1.0f}}, // 2
+            {{1.0f, 0.5f},   {1.0f, 1.0f, 0.0f}}, // 3
+        };
+        std::vector<uint32_t> indices = { 0, 1, 2, 2, 1, 3 };
+        
+        vkMeshes.emplace_back(std::make_unique<VulkanMesh>(ctx, *vkSwapchain, vertices, indices));
     }
 
     // create the graphics pipeline
