@@ -4,20 +4,21 @@
 
 #include <iostream>
 
-VulkanMesh::VulkanMesh(VulkanContext& ctx, const VulkanSwapchain& vkSwapchain, const std::vector<Vertex>& vertices) 
-    : vkCtx_(ctx), vkSwapchain_(vkSwapchain), vertices_(std::move(vertices))
+VulkanMesh::VulkanMesh(VulkanContext& ctx, const VulkanSwapchain& vkSwapchain, const std::vector<Vertex>& vertices,const std::vector<uint32_t>& indices)
+    : vkCtx_(ctx), vkSwapchain_(vkSwapchain), vertices_(std::move(vertices)),
+    indices_(std::move(indices))
 {
     VkDeviceSize vertexBufferSize = sizeof(vertices_[0]) * vertices_.size();
     VkDeviceSize uniformBufferSize = sizeof(UniformBufferObject);
-    
+    VkDeviceSize indexBufferSize = sizeof(indices_[0]) * indices_.size();
+
     // create vertex buffer
     createBuffer(vertexBufferSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, vertexBuffer_, vertexBufferMemory_);
-    
-    void* vertexBufferMap = nullptr;
-    vkMapMemory(vkCtx_.device, vertexBufferMemory_, 0, vertexBufferSize, 0, &vertexBufferMap);
-    memcpy(vertexBufferMap, vertices_.data(), vertexBufferSize);
-    vkUnmapMemory(vkCtx_.device, vertexBufferMemory_);
-    vertexBufferMap = nullptr;
+    copyMemory(vkCtx_.device, vertices_.data(), vertexBufferMemory_, vertexBufferSize);
+
+    // index buffer
+    createBuffer(indexBufferSize, VK_BUFFER_USAGE_INDEX_BUFFER_BIT, indexBuffer_, indexBufferMemory_);
+    copyMemory(vkCtx_.device, indices_.data(), indexBufferMemory_, indexBufferSize);
 
     // create uniform buffer
     createBuffer(uniformBufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, uniformBuffer_, uniformBufferMemory_);
@@ -25,6 +26,10 @@ VulkanMesh::VulkanMesh(VulkanContext& ctx, const VulkanSwapchain& vkSwapchain, c
 }
 VulkanMesh::~VulkanMesh() noexcept
 {
+    // index buffer
+    vkDestroyBuffer(vkCtx_.device, indexBuffer_, nullptr);
+    vkFreeMemory(vkCtx_.device, indexBufferMemory_, nullptr);
+    
     // vertex buffer
     vkDestroyBuffer(vkCtx_.device, vertexBuffer_, nullptr);
     vkFreeMemory(vkCtx_.device, vertexBufferMemory_, nullptr);
@@ -74,6 +79,15 @@ uint32_t VulkanMesh::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags p
     VK_THROW("Failed to find suitable memory type");
 }
 
+template<typename T>
+void VulkanMesh::copyMemory(VkDevice device, const T* src, VkDeviceMemory bufferMemory, VkDeviceSize bufferSize)
+{
+    void* data = nullptr;
+    vkMapMemory(device, bufferMemory, 0, bufferSize, 0, &data);
+    memcpy(data, src, bufferSize);
+    vkUnmapMemory(device, bufferMemory);
+}
+
 void VulkanMesh::updateUniformBuffer(float deltaTime)
 {
     UniformBufferObject ubo{};
@@ -103,7 +117,6 @@ void VulkanMesh::updateUniformBuffer(float deltaTime)
             caca = true;
         }
     }*/
-
 
     float radius = 2.0f;
     static float angle = 0.0f;
