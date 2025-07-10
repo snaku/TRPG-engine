@@ -1,9 +1,9 @@
-#include "../Include/VulkanContext.hpp"
-#include "../Include/VulkanSwapchain.hpp"
-#include "../Include/Vertex.hpp"
-#include "../Include/UniformBufferObject.hpp"
-#include "../Include/VulkanMesh.hpp"
-#include "../Include/VulkanPipeline.hpp"
+#include "Include/VulkanContext.hpp"
+#include "Include/VulkanSwapchain.hpp"
+#include "Include/Vertex.hpp"
+#include "Include/UniformBufferObject.hpp"
+#include "Include/VulkanMesh.hpp"
+#include "Include/VulkanPipeline.hpp"
 
 #include <fstream>
 #include <array>

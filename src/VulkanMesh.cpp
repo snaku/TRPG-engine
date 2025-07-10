@@ -1,6 +1,6 @@
-#include "../Include/VulkanContext.hpp"
-#include "../Include/VulkanSwapchain.hpp"
-#include "../Include/VulkanMesh.hpp"
+#include "Include/VulkanContext.hpp"
+#include "Include/VulkanSwapchain.hpp"
+#include "Include/VulkanMesh.hpp"
 
 #include <iostream>
 

@@ -1,6 +1,6 @@
-#include "../Include/VulkanContext.hpp"
-#include "../Include/VulkanSwapchain.hpp"
-#include "../Include/VulkanRenderPass.hpp"
+#include "Include/VulkanContext.hpp"
+#include "Include/VulkanSwapchain.hpp"
+#include "Include/VulkanRenderPass.hpp"
 
 VulkanRenderPass::VulkanRenderPass(VulkanContext& ctx, const VulkanSwapchain& vkSwapchain)
     : vkCtx_(ctx), vkSwapchain_(vkSwapchain)

@@ -1,8 +1,8 @@
-#include "../Include/VulkanContext.hpp"
-#include "../Include/VulkanDevice.hpp"
-#include "../Include/VulkanSwapchain.hpp"
-#include "../Include/VulkanMesh.hpp"
-#include "../Include/VulkanCommandBuffer.hpp"
+#include "Include/VulkanContext.hpp"
+#include "Include/VulkanDevice.hpp"
+#include "Include/VulkanSwapchain.hpp"
+#include "Include/VulkanMesh.hpp"
+#include "Include/VulkanCommandBuffer.hpp"
 
 #include <GLFW/glfw3.h>
 #include <iostream>

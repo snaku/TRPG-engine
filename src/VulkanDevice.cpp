@@ -1,5 +1,5 @@
-#include "../Include/VulkanContext.hpp"
-#include "../Include/VulkanDevice.hpp"
+#include "Include/VulkanContext.hpp"
+#include "Include/VulkanDevice.hpp"
 
 #include <iostream>
 #include <set>

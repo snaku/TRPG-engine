@@ -1,7 +1,7 @@
-#include "../Include/VulkanContext.hpp"
-#include "../Include/Window.hpp"
-#include "../Include/VulkanSwapchain.hpp"
-#include "../Include/VulkanDevice.hpp"
+#include "Include/VulkanContext.hpp"
+#include "Include/Window.hpp"
+#include "Include/VulkanSwapchain.hpp"
+#include "Include/VulkanDevice.hpp"
 
 #include <array>
 #include <algorithm>

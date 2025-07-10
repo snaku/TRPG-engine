@@ -1,4 +1,4 @@
-#include "../Include/Window.hpp"
+#include "Include/Window.hpp"
 
 Window::~Window() noexcept
 {

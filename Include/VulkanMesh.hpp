@@ -3,13 +3,14 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <GLFW/glfw3.h>
 
-#include "../Include/Vertex.hpp"
-#include "../Include/UniformBufferObject.hpp"
+#include "Include/Vertex.hpp"
+#include "Include/UniformBufferObject.hpp"
 
 #include <vector>
 
 struct VulkanContext;
 class VulkanSwapchain;
+
 class VulkanMesh
 {
 public:

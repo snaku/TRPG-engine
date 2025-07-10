@@ -1,15 +1,15 @@
-#include "../Include/Window.hpp"
-#include "../Include/VulkanContext.hpp"
-#include "../Include/VulkanInstance.hpp"
-#include "../Include/VulkanDevice.hpp"
-#include "../Include/VulkanSwapchain.hpp"
-#include "../Include/VulkanRenderPass.hpp"
-#include "../Include/Vertex.hpp"
-#include "../Include/VulkanPipeline.hpp"
-#include "../Include/VulkanFrameBuffer.hpp"
-#include "../Include/VulkanMesh.hpp"
-#include "../Include/VulkanCommandBuffer.hpp"
-#include "../Include/Engine.hpp"
+#include "Include/Window.hpp"
+#include "Include/VulkanContext.hpp"
+#include "Include/VulkanInstance.hpp"
+#include "Include/VulkanDevice.hpp"
+#include "Include/VulkanSwapchain.hpp"
+#include "Include/VulkanRenderPass.hpp"
+#include "Include/Vertex.hpp"
+#include "Include/VulkanPipeline.hpp"
+#include "Include/VulkanFrameBuffer.hpp"
+#include "Include/VulkanMesh.hpp"
+#include "Include/VulkanCommandBuffer.hpp"
+#include "Include/Engine.hpp"
 
 #include <memory>
 #include <cassert>
@@ -42,12 +42,20 @@ namespace engine
         vkSwapchain = std::make_unique<VulkanSwapchain>(ctx, *vkDevice, window);
         vkRenderPass = std::make_unique<VulkanRenderPass>(ctx, *vkSwapchain);
 
-        std::vector<Vertex> vertices = 
+        /*std::vector<Vertex> vertices = 
         {
             {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}}, // 0
             {{0.0f, 0.5f},   {0.0f, 1.0f, 0.0f}}, // 1
             {{0.5f, -0.5f},  {0.0f, 0.0f, 1.0f}}, // 2
             {{1.0f, 0.5f},   {1.0f, 1.0f, 0.0f}}, // 3
+        };*/
+
+        std::vector<Vertex> vertices = 
+        {
+            {{-0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}}, // 0
+            {{0.0f, 0.5f},   {1.0f, 1.0f, 1.0f}}, // 1
+            {{0.5f, -0.5f},  {1.0f, 1.0f, 1.0f}}, // 2
+            {{1.0f, 0.5f},   {1.0f, 1.0f, 1.0f}}, // 3
         };
         std::vector<uint32_t> indices = { 0, 1, 2, 2, 1, 3 };
         
