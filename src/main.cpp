@@ -12,6 +12,9 @@ int main()
 	try 
 	{
 		engine::initEngine();
+
+		engine::createObject();
+		
 		engine::createPipeline("shaders/vert.spv", "shaders/frag.spv");
 		engine::prepareRender();
 
