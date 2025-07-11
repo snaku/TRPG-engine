@@ -6,6 +6,7 @@ namespace engine
 {
     void initEngine();
     void createPipeline(const std::string& vertexShader, const std::string& fragmentShader);
+    void createObject();
     void prepareRender();
     void render();
 
