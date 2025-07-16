@@ -53,7 +53,7 @@ void VulkanCommandBuffer::createCommandBuffer()
         renderPassInfo.renderArea.offset = {0, 0};
         renderPassInfo.renderArea.extent = vkSwapchain_.getExtent();
         
-        VkClearValue clearColor = {{{0.0f, 0.0f, 0.3f, 1.0f}}};
+        VkClearValue clearColor = {{{0.1f, 0.0f, 0.3f, 1.0f}}};
         renderPassInfo.clearValueCount = 1;
         renderPassInfo.pClearValues = &clearColor;
 
@@ -62,15 +62,12 @@ void VulkanCommandBuffer::createCommandBuffer()
         
         for (const auto& mesh : meshes_)
         {
-            VkBuffer vertexBuffers[] = { mesh->getVertexBuffer() };
             std::vector<uint32_t> indices = mesh->getIndices();
             VkDeviceSize offsets[] = {0};
             
-            vkCmdBindVertexBuffers(vkCtx_.commandBuffers[i], 0, 1, vertexBuffers, offsets);
-            vkCmdBindIndexBuffer(vkCtx_.commandBuffers[i], mesh->getIndexBuffer(), 0, VK_INDEX_TYPE_UINT32);
+            mesh->bind(vkCtx_.commandBuffers[i]);
             vkCmdBindDescriptorSets(vkCtx_.commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, vkCtx_.pipelineLayout, 0, 1, &vkCtx_.descriptorSet, 0, nullptr);
             vkCmdDrawIndexed(vkCtx_.commandBuffers[i], (uint32_t)indices.size(), 1, 0, 0, 0);
-            // vkCmdDraw(vkCtx_.commandBuffers[i], (uint32_t)mesh->getVerticesSize(), 1, 0, 0);
         }
         
         vkCmdEndRenderPass(vkCtx_.commandBuffers[i]);
