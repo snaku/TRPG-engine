@@ -88,6 +88,14 @@ void VulkanMesh::copyMemory(VkDevice device, const T* src, VkDeviceMemory buffer
     vkUnmapMemory(device, bufferMemory);
 }
 
+void VulkanMesh::bind(VkCommandBuffer cmd)
+{
+    VkDeviceSize offsets[] = { 0 };
+
+    vkCmdBindVertexBuffers(cmd, 0, 1, &vertexBuffer_, offsets);
+    vkCmdBindIndexBuffer(cmd, indexBuffer_, 0, VK_INDEX_TYPE_UINT32);
+}
+
 void VulkanMesh::updateUniformBuffer(float deltaTime)
 {
     UniformBufferObject ubo{};
