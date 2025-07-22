@@ -10,22 +10,23 @@
 
 struct VulkanContext;
 class VulkanSwapchain;
+class Camera;
 
 class VulkanMesh
 {
 public:
     VulkanMesh(VulkanContext& ctx, const VulkanSwapchain& vkSwapchain,
-               const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices);
+               std::vector<Vertex> vertices, std::vector<uint32_t> indices);
     ~VulkanMesh() noexcept;
 
     void bind(VkCommandBuffer cmd);
-    void updateUniformBuffer(float deltaTime);
+    void updateUniformBuffer(const Camera& camera, float deltaTime);
 
     // getters
     VkBuffer getVertexBuffer() const { return vertexBuffer_; }
     VkBuffer getUniformBuffer() const { return uniformBuffer_; }
     VkBuffer getIndexBuffer() const { return indexBuffer_; }
-    size_t getVerticesSize() const { return vertices_.size(); }
+    std::size_t getVerticesSize() const { return vertices_.size(); }
     std::vector<uint32_t> getIndices() const { return indices_; }
 
 private:

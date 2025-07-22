@@ -1,10 +1,11 @@
 #include "Include/VulkanContext.hpp"
 #include "Include/VulkanSwapchain.hpp"
+#include "Include/Camera.hpp"
 #include "Include/VulkanMesh.hpp"
 
 #include <iostream>
 
-VulkanMesh::VulkanMesh(VulkanContext& ctx, const VulkanSwapchain& vkSwapchain, const std::vector<Vertex>& vertices,const std::vector<uint32_t>& indices)
+VulkanMesh::VulkanMesh(VulkanContext& ctx, const VulkanSwapchain& vkSwapchain, std::vector<Vertex> vertices, std::vector<uint32_t> indices)
     : vkCtx_(ctx), vkSwapchain_(vkSwapchain), vertices_(std::move(vertices)),
     indices_(std::move(indices))
 {
@@ -24,6 +25,7 @@ VulkanMesh::VulkanMesh(VulkanContext& ctx, const VulkanSwapchain& vkSwapchain, c
     createBuffer(uniformBufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, uniformBuffer_, uniformBufferMemory_);
     vkMapMemory(vkCtx_.device, uniformBufferMemory_, 0, uniformBufferSize, 0, &uniformBufferMap_);
 }
+
 VulkanMesh::~VulkanMesh() noexcept
 {
     // index buffer
@@ -96,74 +98,13 @@ void VulkanMesh::bind(VkCommandBuffer cmd)
     vkCmdBindIndexBuffer(cmd, indexBuffer_, 0, VK_INDEX_TYPE_UINT32);
 }
 
-void VulkanMesh::updateUniformBuffer(float deltaTime)
+void VulkanMesh::updateUniformBuffer(const Camera& camera, float deltaTime)
 {
     UniformBufferObject ubo{};
-    // ubo.model = glm::rotate(glm::mat4(1.0f), time, glm::vec3(0.0f, 0.0f, 1.0f));
-
-    static float x = 0.0f;
-    static float y = 0.0f;
-    static float z = 2.0f;
-
-    static bool caca = true;
-
-    /*if (caca)
-    {
-        x += 1.0f * deltaTime;
-        if (x >= 3.0f) 
-        {
-            x = 3.0f;
-            caca = false;
-        }
-    }
-    else
-    {
-        x -= 1.0f * deltaTime;
-        if (x <= 0.0f) 
-        {
-            x = 0.0f;
-            caca = true;
-        }
-    }*/
-
-    float radius = 2.0f;
-    static float angle = 0.0f;
-    angle += deltaTime * 1.0f;
-
-    float camX = radius * cos(angle);
-    float camY = radius * sin(angle);
 
     ubo.model = glm::mat4(1.0f);
-
-    // glm::vec3(2.0f, 2.0f, 1.0f)
-    ubo.view = glm::lookAt(
-        glm::vec3(camX, camY, 1.0f),
-        glm::vec3(0.0f, 0.0f, 0.0f),
-        glm::vec3(0.0f, 0.0f, 1.0f)
-    );
-
-    ubo.proj = glm::perspective(
-        glm::radians(45.0f),
-        vkSwapchain_.getExtent().width / (float)vkSwapchain_.getExtent().height,
-        0.1f,
-        100.0f
-    );
-    ubo.proj[1][1] *= -1;
-
-    /*static float scale = 0.25f;
-    static bool isIncreasing = true;
-    if (isIncreasing)
-    {
-        scale += deltaTime * 0.50f;
-        if (scale >= 1.5f) isIncreasing = false;
-    }
-    else 
-    {
-        scale -= deltaTime * 0.50f;
-        if (scale <= 0.1f) isIncreasing = true;
-    }
-
-    ubo.model = glm::scale(glm::mat4(1.0f), glm::vec3(scale, scale, scale));*/
+    ubo.view = camera.getViewMatrix();
+    ubo.proj = camera.getProjectionMatrix();
 
     memcpy(uniformBufferMap_, &ubo, sizeof(ubo));
 }
