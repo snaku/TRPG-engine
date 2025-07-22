@@ -8,6 +8,7 @@
 #include "Include/Vertex.hpp"
 #include "Include/VulkanPipeline.hpp"
 #include "Include/VulkanFrameBuffer.hpp"
+#include "Include/VulkanTexture.hpp"
 #include "Include/VulkanMesh.hpp"
 #include "Include/VulkanCommandBuffer.hpp"
 #include "Include/Renderer.hpp"
@@ -20,10 +21,11 @@ public:
     VulkanRenderer(Window& window);
 
     void init() override;
-    void createPipeline(const std::string& vertexShader, const std::string& fragmentShader) override;
+    void createPipeline(std::string_view vertexShader, std::string_view fragmentShader) override;
     void prepareRender() override;
     void createObject() override;
-    void renderFrame() override;
+    void renderFrame(const Camera& camera) override;
+    void loadTexture(const std::filesystem::path& texturePath) override;
 
 private:
     Window& window_;
@@ -35,6 +37,7 @@ private:
     std::unique_ptr<VulkanRenderPass> vkRenderPass_;
     std::unique_ptr<VulkanPipeline> vkPipeline_;
     std::unique_ptr<VulkanFrameBuffer> vkFramebuffer_;
+    std::unique_ptr<VulkanTexture> vkTexture_;
     std::vector<std::unique_ptr<VulkanMesh>> vkMeshes_;
     std::unique_ptr<VulkanCommandBuffer> vkCmdBuffer_;
 };
