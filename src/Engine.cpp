@@ -1,4 +1,5 @@
 #include "Include/Window.hpp"
+#include "Include/Camera.hpp"
 #include "Include/VulkanRenderer.hpp"
 #include "Include/Engine.hpp"
 
@@ -6,9 +7,12 @@
 
 namespace engine
 {
-    static Window window;
-    static std::unique_ptr<Renderer> renderer;
-    
+    namespace
+    {
+        Window window;
+        std::unique_ptr<Renderer> renderer;
+    }
+
     /*
     *  initialize the vulkan instance, device, swapchain,
     *  render pass
@@ -21,9 +25,14 @@ namespace engine
     }
 
     // create the graphics pipeline
-    void createPipeline(const std::string& vertexShader, const std::string& fragmentShader)
+    void createPipeline(std::string_view vertexShader, std::string_view fragmentShader)
     {
         renderer->createPipeline(vertexShader, fragmentShader);
+    }
+
+    void loadTexture(const std::filesystem::path& texturePath)
+    {
+        renderer->loadTexture(texturePath);
     }
 
     // create a simple game object
@@ -37,9 +46,9 @@ namespace engine
         renderer->prepareRender();
     }
 
-    void render()
+    void render(const Camera& camera)
     {
-        renderer->renderFrame();
+        renderer->renderFrame(camera);
     }
 
     // initialize the window
@@ -58,5 +67,22 @@ namespace engine
     void pollEvents()
     {
         window.pollEvents();
+    }
+
+    int right()
+    {
+        return glfwGetKey(window.getWindow(), GLFW_KEY_D);
+    }
+    int left()
+    {
+        return glfwGetKey(window.getWindow(), GLFW_KEY_A);
+    }
+    int up()
+    {
+        return glfwGetKey(window.getWindow(), GLFW_KEY_W);
+    }
+    int down()
+    {
+        return glfwGetKey(window.getWindow(), GLFW_KEY_S);
     }
 }
