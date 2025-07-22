@@ -85,7 +85,7 @@ void VulkanCommandBuffer::createSemaphore()
     VK_CHECK(vkCreateSemaphore(vkCtx_.device, &semaphoreInfo, nullptr, &vkCtx_.renderFinishedSemaphore));
 }
 
-void VulkanCommandBuffer::drawFrame()
+void VulkanCommandBuffer::drawFrame(const Camera& camera)
 {
     uint32_t imgIndex;
     vkAcquireNextImageKHR(vkCtx_.device, vkCtx_.swapchain, UINT64_MAX, vkCtx_.imgAvailableSemaphore, VK_NULL_HANDLE, &imgIndex);
@@ -112,7 +112,7 @@ void VulkanCommandBuffer::drawFrame()
 
     for (auto& mesh : meshes_)
     {
-        mesh->updateUniformBuffer(deltaTime);
+        mesh->updateUniformBuffer(camera, deltaTime);
     }
 
     VK_CHECK(vkQueueSubmit(vkCtx_.graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE));

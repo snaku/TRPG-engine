@@ -5,6 +5,7 @@
 struct VulkanContext;
 class VulkanDevice;
 class VulkanSwapchain;
+class Camera;
 class VulkanMesh;
 
 class VulkanCommandBuffer
@@ -15,7 +16,7 @@ public:
     
     ~VulkanCommandBuffer() noexcept;
 
-    void drawFrame();
+    void drawFrame(const Camera& camera);
 private:
     void createCommandPool();
     void createCommandBuffer();
