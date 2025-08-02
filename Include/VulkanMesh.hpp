@@ -20,7 +20,7 @@ public:
     ~VulkanMesh() noexcept;
 
     void bind(VkCommandBuffer cmd);
-    void updateUniformBuffer(const Camera& camera, float deltaTime);
+    void updateUniformBuffer(const glm::mat4& model, const Camera& camera, float deltaTime);
 
     // getters
     VkBuffer getVertexBuffer() const { return vertexBuffer_; }
