@@ -16,7 +16,6 @@ struct TransformComponent : IComponent
     {
         glm::mat4 mat = glm::mat4(1.0f);
 
-        // Ordre : Scale → Rotation → Translation
         mat = glm::translate(mat, position);
 
         mat = glm::rotate(mat, glm::radians(rotation.x), glm::vec3(1, 0, 0));
