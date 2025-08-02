@@ -41,14 +41,19 @@ namespace engine
         renderer->createObject();
     }
 
+    void createMesh(const RenderableData& data)
+    {
+        renderer->createMesh(data);
+    }
+
     void prepareRender()
     {
         renderer->prepareRender();
     }
 
-    void render(const Camera& camera)
+    void render(const Scene& scene, const Camera& camera)
     {
-        renderer->renderFrame(camera);
+        renderer->renderFrame(scene, camera);
     }
 
     // initialize the window
@@ -84,5 +89,25 @@ namespace engine
     int down()
     {
         return glfwGetKey(window.getWindow(), GLFW_KEY_S);
+    }
+    int downArrow()
+    {
+        return glfwGetKey(window.getWindow(), GLFW_KEY_DOWN);
+    }
+    int upArrow()
+    {
+        return glfwGetKey(window.getWindow(), GLFW_KEY_UP);
+    }
+    int leftArrow()
+    {
+        return glfwGetKey(window.getWindow(), GLFW_KEY_LEFT);
+    }
+    int rightArrow()
+    {
+        return glfwGetKey(window.getWindow(), GLFW_KEY_RIGHT);
+    }
+    int shiftKey()
+    {
+        return glfwGetKey(window.getWindow(), GLFW_KEY_LEFT_SHIFT);
     }
 }
