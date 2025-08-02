@@ -32,6 +32,19 @@ void Camera::rotate(float yaw, float pitch)
     if (pitch_ < -89.0f) pitch_ = -89.0f;
 }
 
+void Camera::rotateX(float pitch)
+{
+    pitch_ += pitch;
+
+    if (pitch_ > 89.0f) pitch_ = 89.0f;
+    if (pitch_ < -89.0f) pitch_ = -89.0f;
+}
+
+void Camera::rotateY(float yaw)
+{
+    yaw_ += yaw;
+}
+
 glm::vec3 Camera::getFrontVector() const
 {
     glm::vec3 front;
@@ -54,7 +67,7 @@ glm::mat4 Camera::getProjectionMatrix() const
 {
     glm::mat4 projection = glm::perspective(glm::radians(fov_), 16.0f/9.0f, 0.1f, 100.0f);
     
-    projection[1][1] *= -1.0f;
+    projection[1][1] *= -1.0f; // invert the Y axis
     
     return projection;
 }

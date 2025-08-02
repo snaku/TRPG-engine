@@ -10,10 +10,16 @@ public:
     Camera(const glm::vec3& pos, float yaw, float pitch, float fov);
 
     void setPosition(const glm::vec3& pos);
+    
+    // move
     void move(const glm::vec3& direction);
     void moveForward(float distance);
     void moveRight(float distance);
+
+    // rotation
     void rotate(float yaw, float pitch);
+    void rotateY(float yaw);
+    void rotateX(float pitch);
     
     // getters
     glm::vec3 getPosition() const { return position_; }
