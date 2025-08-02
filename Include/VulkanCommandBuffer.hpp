@@ -8,6 +8,11 @@ class VulkanSwapchain;
 class Camera;
 class VulkanMesh;
 
+namespace engine
+{
+    class Scene;
+}
+
 class VulkanCommandBuffer
 {
 public:    
@@ -16,7 +21,7 @@ public:
     
     ~VulkanCommandBuffer() noexcept;
 
-    void drawFrame(const Camera& camera);
+    void drawFrame(const engine::Scene& scene, const Camera& camera);
 private:
     void createCommandPool();
     void createCommandBuffer();

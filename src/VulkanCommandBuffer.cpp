@@ -2,6 +2,7 @@
 #include "Include/VulkanDevice.hpp"
 #include "Include/VulkanSwapchain.hpp"
 #include "Include/VulkanMesh.hpp"
+#include "Include/Scene.hpp"
 #include "Include/VulkanCommandBuffer.hpp"
 
 #include <GLFW/glfw3.h>
@@ -53,7 +54,7 @@ void VulkanCommandBuffer::createCommandBuffer()
         renderPassInfo.renderArea.offset = {0, 0};
         renderPassInfo.renderArea.extent = vkSwapchain_.getExtent();
         
-        VkClearValue clearColor = {{{0.1f, 0.0f, 0.3f, 1.0f}}};
+        VkClearValue clearColor = {{{0.0f, 0.1f, 0.1f, 1.0f}}};
         renderPassInfo.clearValueCount = 1;
         renderPassInfo.pClearValues = &clearColor;
 
@@ -85,7 +86,7 @@ void VulkanCommandBuffer::createSemaphore()
     VK_CHECK(vkCreateSemaphore(vkCtx_.device, &semaphoreInfo, nullptr, &vkCtx_.renderFinishedSemaphore));
 }
 
-void VulkanCommandBuffer::drawFrame(const Camera& camera)
+void VulkanCommandBuffer::drawFrame(const engine::Scene& scene, const Camera& camera)
 {
     uint32_t imgIndex;
     vkAcquireNextImageKHR(vkCtx_.device, vkCtx_.swapchain, UINT64_MAX, vkCtx_.imgAvailableSemaphore, VK_NULL_HANDLE, &imgIndex);
@@ -97,7 +98,7 @@ void VulkanCommandBuffer::drawFrame(const Camera& camera)
 
     VkSubmitInfo submitInfo{};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-
+    
     VkSemaphore waitSemaphores[] = {vkCtx_.imgAvailableSemaphore};
     VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
     submitInfo.waitSemaphoreCount = 1;
@@ -110,9 +111,11 @@ void VulkanCommandBuffer::drawFrame(const Camera& camera)
     submitInfo.signalSemaphoreCount = 1;
     submitInfo.pSignalSemaphores = signalSemaphores;
 
-    for (auto& mesh : meshes_)
+    const auto& renderables = scene.getRenderableData();
+
+    for (std::size_t i = 0; i < renderables.size(); ++i)
     {
-        mesh->updateUniformBuffer(camera, deltaTime);
+        meshes_[i]->updateUniformBuffer(renderables[i].gameObjectData->model, camera, deltaTime);
     }
 
     VK_CHECK(vkQueueSubmit(vkCtx_.graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE));
