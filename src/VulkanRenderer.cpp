@@ -1,5 +1,6 @@
 #include "Include/Window.hpp"
 #include "Include/VulkanContext.hpp"
+#include "Include/RenderableData.hpp"
 #include "Include/VulkanRenderer.hpp"
 
 VulkanRenderer::VulkanRenderer(Window &window) 
@@ -32,11 +33,11 @@ void VulkanRenderer::prepareRender()
     vkCmdBuffer_ = std::make_unique<VulkanCommandBuffer>(vkCtx_, *vkDevice_, *vkSwapchain_, vkMeshes_);
 }
 
-void VulkanRenderer::renderFrame(const Camera& camera)
+void VulkanRenderer::renderFrame(const engine::Scene& scene, const Camera& camera)
 {
     assert(vkCmdBuffer_ != nullptr);
 
-    vkCmdBuffer_->drawFrame(camera);
+    vkCmdBuffer_->drawFrame(scene, camera);
     vkDeviceWaitIdle(vkCtx_.device); // will do better later
 }
 
@@ -52,6 +53,11 @@ void VulkanRenderer::createObject()
     std::vector<uint32_t> indices = { 0, 1, 2, 2, 1, 3 };
         
     vkMeshes_.emplace_back(std::make_unique<VulkanMesh>(vkCtx_, *vkSwapchain_, vertices, indices));
+}
+
+void VulkanRenderer::createMesh(const RenderableData& data)
+{
+    vkMeshes_.emplace_back(std::make_unique<VulkanMesh>(vkCtx_, *vkSwapchain_, data.vertices, data.indices));
 }
 
 void VulkanRenderer::loadTexture(const std::filesystem::path& texturePath)

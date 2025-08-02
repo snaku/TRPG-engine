@@ -18,13 +18,14 @@ class Window;
 class VulkanRenderer : public Renderer
 {
 public:
-    VulkanRenderer(Window& window);
+    explicit VulkanRenderer(Window& window);
 
     void init() override;
     void createPipeline(std::string_view vertexShader, std::string_view fragmentShader) override;
     void prepareRender() override;
     void createObject() override;
-    void renderFrame(const Camera& camera) override;
+    void createMesh(const RenderableData& data) override;
+    void renderFrame(const engine::Scene& scene, const Camera& camera) override;
     void loadTexture(const std::filesystem::path& texturePath) override;
 
 private:
