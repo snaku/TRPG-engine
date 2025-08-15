@@ -14,31 +14,21 @@ GameObject::GameObject(std::string name, float xPos, float yPos, float zPos)
 
 void GameObject::update(float deltaTime)
 {
-    TransformComponent* transform = nullptr;
-
     for (const auto& component : components_)
     {
         if (component)
         {
             component->update(deltaTime);
-
-            if (!transform)
-            {
-                transform = dynamic_cast<TransformComponent*>(component.get());
-            }
         }
     }
+
+    auto transform = getComponent<TransformComponent>();
 
     if (transform)
     {
         data_.model = transform->modelMatrix;
         data_.position = transform->position;
     }
-
-    /*pos_ = glm::vec3(model_[3]);
-    
-    data_.model = model_;
-    data_.position = pos_;*/
 }
 
 }
