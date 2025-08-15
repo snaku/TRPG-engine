@@ -2,7 +2,7 @@
 #include "Include/VulkanDevice.hpp"
 #include "Include/VulkanSwapchain.hpp"
 #include "Include/VulkanMesh.hpp"
-#include "Include/Scene.hpp"
+#include "Include/RenderableData.hpp"
 #include "Include/VulkanCommandBuffer.hpp"
 
 #include <GLFW/glfw3.h>
@@ -15,20 +15,78 @@ VulkanCommandBuffer::VulkanCommandBuffer(VulkanContext& ctx,
     : vkCtx_(ctx), vkDevice_(vkDevice), vkSwapchain_(vkSwapchain), meshes_(meshes)
 {
     createCommandPool();
-    createCommandBuffer();
+    allocateCommandBuffers();
     createSemaphore();
+    createFence();
 }
 VulkanCommandBuffer::~VulkanCommandBuffer() noexcept
 {
+    vkDeviceWaitIdle(vkCtx_.device);
+
     if (vkCtx_.commandPool != VK_NULL_HANDLE)
 	{
 		vkDestroyCommandPool(vkCtx_.device, vkCtx_.commandPool, nullptr);
 	}
-    vkDestroySemaphore(vkCtx_.device, vkCtx_.renderFinishedSemaphore, nullptr);
-    vkDestroySemaphore(vkCtx_.device, vkCtx_.imgAvailableSemaphore, nullptr);
+    if (vkCtx_.renderFinishedSemaphore != VK_NULL_HANDLE)
+    {
+        vkDestroySemaphore(vkCtx_.device, vkCtx_.renderFinishedSemaphore, nullptr);
+    }
+    if (vkCtx_.imgAvailableSemaphore != VK_NULL_HANDLE)
+    {
+        vkDestroySemaphore(vkCtx_.device, vkCtx_.imgAvailableSemaphore, nullptr);
+    }
+    if (inFlightFence != VK_NULL_HANDLE)
+    {
+        vkDestroyFence(vkCtx_.device, inFlightFence, nullptr);
+    }
 }
 
-void VulkanCommandBuffer::createCommandBuffer()
+void VulkanCommandBuffer::recordCommandBuffer(uint32_t imgIndex, const std::vector<RenderableData>& renderables, const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix)
+{
+    VK_CHECK(vkResetCommandBuffer(vkCtx_.commandBuffers[imgIndex], 0));
+
+    VkCommandBufferBeginInfo beginInfo{};
+    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+    VK_CHECK(vkBeginCommandBuffer(vkCtx_.commandBuffers[imgIndex], &beginInfo));
+
+    VkRenderPassBeginInfo renderPassInfo{};
+    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+    renderPassInfo.renderPass = vkCtx_.renderPass;
+    renderPassInfo.framebuffer = vkCtx_.swapChainFrameBuffers[imgIndex];
+    renderPassInfo.renderArea.offset = {0, 0};
+    renderPassInfo.renderArea.extent = vkSwapchain_.getExtent();
+        
+    VkClearValue clearColor = {{{0.0f, 0.1f, 0.1f, 1.0f}}};
+    renderPassInfo.clearValueCount = 1;
+    renderPassInfo.pClearValues = &clearColor;
+
+    vkCmdBeginRenderPass(vkCtx_.commandBuffers[imgIndex], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+    vkCmdBindPipeline(vkCtx_.commandBuffers[imgIndex], VK_PIPELINE_BIND_POINT_GRAPHICS, vkCtx_.pipeline);
+    vkCmdBindDescriptorSets(vkCtx_.commandBuffers[imgIndex], VK_PIPELINE_BIND_POINT_GRAPHICS, vkCtx_.pipelineLayout, 0, 1, &vkCtx_.descriptorSet, 0, nullptr);
+
+    for (std::size_t i = 0; i < renderables.size(); ++i)
+    {
+        const auto& renderable = renderables[i];
+        const auto& mesh = meshes_[i];
+
+        mesh->updatePushConstantData(renderable.gameObjectData->model);
+        mesh->updateUniformBuffer(viewMatrix, projectionMatrix);
+
+        VkDeviceSize offsets[] = {0};
+        
+        mesh->bind(vkCtx_.commandBuffers[imgIndex]);
+        mesh->sendPushConstantData(vkCtx_.commandBuffers[imgIndex], vkCtx_.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(glm::mat4));
+        vkCmdDrawIndexed(vkCtx_.commandBuffers[imgIndex], (uint32_t)mesh->getIndices().size(), 1, 0, 0, 0);
+    }
+     
+    vkCmdEndRenderPass(vkCtx_.commandBuffers[imgIndex]);
+
+    VK_CHECK(vkEndCommandBuffer(vkCtx_.commandBuffers[imgIndex]));
+}
+
+void VulkanCommandBuffer::allocateCommandBuffers()
 {
     vkCtx_.commandBuffers.resize(vkCtx_.swapChainFrameBuffers.size());
 
@@ -39,42 +97,6 @@ void VulkanCommandBuffer::createCommandBuffer()
     allocInfo.commandBufferCount = (uint32_t)vkCtx_.commandBuffers.size();
 
     VK_CHECK(vkAllocateCommandBuffers(vkCtx_.device, &allocInfo, vkCtx_.commandBuffers.data()));
-
-    for (std::size_t i = 0; i < vkCtx_.commandBuffers.size(); i++)
-    {
-        VkCommandBufferBeginInfo beginInfo{};
-        beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-
-        VK_CHECK(vkBeginCommandBuffer(vkCtx_.commandBuffers[i], &beginInfo));
-
-        VkRenderPassBeginInfo renderPassInfo{};
-        renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-        renderPassInfo.renderPass = vkCtx_.renderPass;
-        renderPassInfo.framebuffer = vkCtx_.swapChainFrameBuffers[i];
-        renderPassInfo.renderArea.offset = {0, 0};
-        renderPassInfo.renderArea.extent = vkSwapchain_.getExtent();
-        
-        VkClearValue clearColor = {{{0.0f, 0.1f, 0.1f, 1.0f}}};
-        renderPassInfo.clearValueCount = 1;
-        renderPassInfo.pClearValues = &clearColor;
-
-        vkCmdBeginRenderPass(vkCtx_.commandBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-        vkCmdBindPipeline(vkCtx_.commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, vkCtx_.pipeline);
-        
-        for (const auto& mesh : meshes_)
-        {
-            std::vector<uint32_t> indices = mesh->getIndices();
-            VkDeviceSize offsets[] = {0};
-            
-            mesh->bind(vkCtx_.commandBuffers[i]);
-            vkCmdBindDescriptorSets(vkCtx_.commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, vkCtx_.pipelineLayout, 0, 1, &vkCtx_.descriptorSet, 0, nullptr);
-            vkCmdDrawIndexed(vkCtx_.commandBuffers[i], (uint32_t)indices.size(), 1, 0, 0, 0);
-        }
-        
-        vkCmdEndRenderPass(vkCtx_.commandBuffers[i]);
-
-        VK_CHECK(vkEndCommandBuffer(vkCtx_.commandBuffers[i]));
-    }
 }
 
 void VulkanCommandBuffer::createSemaphore()
@@ -86,16 +108,29 @@ void VulkanCommandBuffer::createSemaphore()
     VK_CHECK(vkCreateSemaphore(vkCtx_.device, &semaphoreInfo, nullptr, &vkCtx_.renderFinishedSemaphore));
 }
 
-void VulkanCommandBuffer::drawFrame(const engine::Scene& scene, const Camera& camera)
+void VulkanCommandBuffer::createFence()
 {
+    VkFenceCreateInfo fenceInfo{};
+    fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+    fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+
+    VK_CHECK(vkCreateFence(vkCtx_.device, &fenceInfo, nullptr, &inFlightFence));
+}
+
+void VulkanCommandBuffer::drawFrame(const std::vector<RenderableData>& renderables, const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix)
+{
+    VK_CHECK(vkWaitForFences(vkCtx_.device, 1, &inFlightFence, VK_TRUE, UINT64_MAX));
+
+    if (inFlightFence != VK_NULL_HANDLE)
+    {
+        VK_CHECK(vkResetFences(vkCtx_.device, 1, &inFlightFence));
+    }
+
     uint32_t imgIndex;
     vkAcquireNextImageKHR(vkCtx_.device, vkCtx_.swapchain, UINT64_MAX, vkCtx_.imgAvailableSemaphore, VK_NULL_HANDLE, &imgIndex);
-
-    // deltatime here
-    float currentTime = glfwGetTime();
-    float deltaTime = currentTime - lastTime_;
-    lastTime_ = currentTime;
-
+    
+    recordCommandBuffer(imgIndex, renderables, viewMatrix, projectionMatrix);
+    
     VkSubmitInfo submitInfo{};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
     
@@ -111,14 +146,7 @@ void VulkanCommandBuffer::drawFrame(const engine::Scene& scene, const Camera& ca
     submitInfo.signalSemaphoreCount = 1;
     submitInfo.pSignalSemaphores = signalSemaphores;
 
-    const auto& renderables = scene.getRenderableData();
-
-    for (std::size_t i = 0; i < renderables.size(); ++i)
-    {
-        meshes_[i]->updateUniformBuffer(renderables[i].gameObjectData->model, camera, deltaTime);
-    }
-
-    VK_CHECK(vkQueueSubmit(vkCtx_.graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE));
+    VK_CHECK(vkQueueSubmit(vkCtx_.graphicsQueue, 1, &submitInfo, inFlightFence));
 
     VkPresentInfoKHR presentInfo{};
     presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
@@ -131,7 +159,7 @@ void VulkanCommandBuffer::drawFrame(const engine::Scene& scene, const Camera& ca
     presentInfo.pSwapchains = swapChains;
     presentInfo.pImageIndices = &imgIndex;
 
-    vkQueuePresentKHR(vkCtx_.presentQueue, &presentInfo);
+    VK_CHECK(vkQueuePresentKHR(vkCtx_.presentQueue, &presentInfo));
 }
 
 void VulkanCommandBuffer::createCommandPool()
@@ -139,7 +167,7 @@ void VulkanCommandBuffer::createCommandPool()
 	VkCommandPoolCreateInfo createInfo{};
 	createInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
 	createInfo.queueFamilyIndex = vkDevice_.getGraphicsFamilyIndices();
-	createInfo.flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT;
+	createInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 
 	VK_CHECK(vkCreateCommandPool(vkCtx_.device, &createInfo, nullptr, &vkCtx_.commandPool));
 }

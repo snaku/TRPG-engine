@@ -3,15 +3,10 @@
 #include <memory>
 
 struct VulkanContext;
+struct RenderableData;
 class VulkanDevice;
 class VulkanSwapchain;
-class Camera;
 class VulkanMesh;
-
-namespace engine
-{
-    class Scene;
-}
 
 class VulkanCommandBuffer
 {
@@ -21,15 +16,18 @@ public:
     
     ~VulkanCommandBuffer() noexcept;
 
-    void drawFrame(const engine::Scene& scene, const Camera& camera);
+    void drawFrame(const std::vector<RenderableData>& renderables, const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix);
 private:
     void createCommandPool();
-    void createCommandBuffer();
+    void recordCommandBuffer(uint32_t imgIndex, const std::vector<RenderableData>& renderables, const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix);
+    void allocateCommandBuffers();
     void createSemaphore();
+    void createFence();
 
     VulkanContext& vkCtx_;
     const VulkanDevice& vkDevice_;
     const VulkanSwapchain& vkSwapchain_;
     const std::vector<std::unique_ptr<VulkanMesh>>& meshes_;
-    float lastTime_ = 0.0f; // temporary, will move that later
+    const int MAX_FRAMES_IN_FLIGHT = 2;
+    VkFence inFlightFence = VK_NULL_HANDLE;
 };
