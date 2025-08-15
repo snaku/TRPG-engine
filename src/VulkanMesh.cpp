@@ -98,28 +98,22 @@ void VulkanMesh::bind(VkCommandBuffer cmd)
     vkCmdBindIndexBuffer(cmd, indexBuffer_, 0, VK_INDEX_TYPE_UINT32);
 }
 
-void VulkanMesh::updateUniformBuffer(const glm::mat4& model, const Camera& camera, float deltaTime)
+void VulkanMesh::sendPushConstantData(VkCommandBuffer cmd, VkPipelineLayout layout, VkShaderStageFlags stageFlags, uint32_t offset, uint32_t size)
+{
+    vkCmdPushConstants(cmd, layout, stageFlags, offset, size, &pushConstantModel_);
+}
+
+void VulkanMesh::updatePushConstantData(const glm::mat4& model)
+{
+    pushConstantModel_ = model;
+}
+
+void VulkanMesh::updateUniformBuffer(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix)
 {
     UniformBufferObject ubo{};
 
-    ubo.model = model;
-    ubo.view = camera.getViewMatrix();
-    ubo.proj = camera.getProjectionMatrix();
-
-    glm::vec3 meshPos = glm::vec3(ubo.model[3]);
-
-    float distance = glm::distance(camera.getPosition(), meshPos);
-    
-    constexpr float touchedThreshold = 1.0f;
-    static bool isMeshTouched = false; 
-    
-    if (distance < touchedThreshold && !isMeshTouched)
-    {
-        isMeshTouched = true;
-        std::cout << "Touched mesh !\n";
-    }
-    else if (distance > touchedThreshold && isMeshTouched)
-        isMeshTouched = false;
+    ubo.view = viewMatrix;
+    ubo.proj = projectionMatrix;
 
     memcpy(uniformBufferMap_, &ubo, sizeof(ubo));
 }

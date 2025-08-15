@@ -20,7 +20,9 @@ public:
     ~VulkanMesh() noexcept;
 
     void bind(VkCommandBuffer cmd);
-    void updateUniformBuffer(const glm::mat4& model, const Camera& camera, float deltaTime);
+    void sendPushConstantData(VkCommandBuffer cmd, VkPipelineLayout layout, VkShaderStageFlags stageFlags, uint32_t offset, uint32_t size);
+    void updatePushConstantData(const glm::mat4& model);
+    void updateUniformBuffer(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix);
 
     // getters
     VkBuffer getVertexBuffer() const { return vertexBuffer_; }
@@ -50,4 +52,5 @@ private:
 
     VulkanContext& vkCtx_;
     const VulkanSwapchain& vkSwapchain_;
+    glm::mat4 pushConstantModel_;
 };
