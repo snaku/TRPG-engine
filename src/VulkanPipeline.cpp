@@ -20,14 +20,17 @@ VulkanPipeline::~VulkanPipeline() noexcept
     if (vkCtx_.pipeline != VK_NULL_HANDLE)
     {
         vkDestroyPipeline(vkCtx_.device, vkCtx_.pipeline, nullptr);
+        vkCtx_.pipeline = VK_NULL_HANDLE;
     }
     if (vkCtx_.pipelineLayout != VK_NULL_HANDLE)
     {
         vkDestroyPipelineLayout(vkCtx_.device, vkCtx_.pipelineLayout, nullptr);
+        vkCtx_.pipelineLayout = VK_NULL_HANDLE;
     }
     if (vkCtx_.descriptorSetLayout != VK_NULL_HANDLE)
     {
         vkDestroyDescriptorSetLayout(vkCtx_.device, vkCtx_.descriptorSetLayout, nullptr);
+        vkCtx_.descriptorSetLayout = VK_NULL_HANDLE;
     }
 }
 
@@ -144,7 +147,7 @@ void VulkanPipeline::createPipeline()
     rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
     rasterizer.lineWidth = 1.0f;
 
-    rasterizer.cullMode = VK_CULL_MODE_NONE; // VK_CULL_MODE_BACK_BIT
+    rasterizer.cullMode = VK_CULL_MODE_BACK_BIT; // VK_CULL_MODE_BACK_BIT
     rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE; // VK_FRONT_FACE_CLOCKWISE
     
     rasterizer.depthBiasEnable = VK_FALSE;
@@ -196,10 +199,18 @@ void VulkanPipeline::createPipeline()
 
     VK_CHECK(vkCreateDescriptorSetLayout(vkCtx_.device, &layoutInfo, nullptr, &vkCtx_.descriptorSetLayout));
 
+    // push constant
+    VkPushConstantRange range{};
+    range.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+    range.offset = 0;
+    range.size = sizeof(glm::mat4);
+
     VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;  
     pipelineLayoutInfo.setLayoutCount = 1;
     pipelineLayoutInfo.pSetLayouts = &vkCtx_.descriptorSetLayout; 
+    pipelineLayoutInfo.pushConstantRangeCount = 1;
+    pipelineLayoutInfo.pPushConstantRanges = &range;
 
     VK_CHECK(vkCreatePipelineLayout(vkCtx_.device, &pipelineLayoutInfo, nullptr, &vkCtx_.pipelineLayout));
 
