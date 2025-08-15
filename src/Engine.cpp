@@ -53,7 +53,7 @@ namespace engine
 
     void render(const Scene& scene, const Camera& camera)
     {
-        renderer->renderFrame(scene, camera);
+        renderer->renderFrame(scene.getRenderableData(), camera.getViewMatrix(), camera.getProjectionMatrix());
     }
 
     // initialize the window
