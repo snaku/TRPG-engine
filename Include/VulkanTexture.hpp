@@ -14,8 +14,17 @@ public:
     ~VulkanTexture() noexcept;
 
     void createTextureImage(const std::filesystem::path& texturePath);
+
+    struct TextureDetails
+    {
+        stbi_uc* texture;
+        int width;
+        int height; 
+        int channels;
+        VkDeviceSize imgSize;
+    };
 private:
-    std::pair<stbi_uc*, VkDeviceSize> loadTexture(const std::filesystem::path& texturePath);
+    TextureDetails loadTexture(const std::filesystem::path& texturePath);
 
     // createBuffer and findMemoryType are temporary here
     void createBuffer(VkDeviceSize bufferSize, VkBufferUsageFlags usage, VkBuffer& buffer, VkDeviceMemory& bufferMemory);

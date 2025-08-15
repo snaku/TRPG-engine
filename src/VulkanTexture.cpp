@@ -1,6 +1,5 @@
-#include "Include/VulkanContext.hpp"
-
 #define STB_IMAGE_IMPLEMENTATION
+#include "Include/VulkanContext.hpp"
 #include "Include/VulkanTexture.hpp"
 
 #include <iostream>
@@ -14,7 +13,7 @@ VulkanTexture::~VulkanTexture() noexcept
     vkFreeMemory(vkCtx_.device, stagingBufferMemory_, nullptr);
 }
 
-std::pair<stbi_uc*, VkDeviceSize> VulkanTexture::loadTexture(const std::filesystem::path& texturePath)
+VulkanTexture::TextureDetails VulkanTexture::loadTexture(const std::filesystem::path& texturePath)
 {
     int width, height, channels;
     stbi_uc* texture = stbi_load(texturePath.u8string().c_str(), &width, &height, &channels, STBI_rgb_alpha);
@@ -26,21 +25,57 @@ std::pair<stbi_uc*, VkDeviceSize> VulkanTexture::loadTexture(const std::filesyst
 
     std::cout << "Texture loaded: " << texturePath << ". Texture width: " << width << " Texture height: " << height << std::endl;
 
-    return {texture, imgSize};
+    TextureDetails details{};
+    details.texture = texture;
+    details.width = width;
+    details.height = height;
+    details.channels = channels;
+    details.imgSize = imgSize;
+
+    return details;
 }
 
 void VulkanTexture::createTextureImage(const std::filesystem::path& texturePath)
 {
-    auto [texture, imgSize] = loadTexture(texturePath);
+    TextureDetails details = loadTexture(texturePath);
 
-    createBuffer(imgSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, stagingBuffer_, stagingBufferMemory_);
+    createBuffer(details.imgSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, stagingBuffer_, stagingBufferMemory_);
 
     void* data;
-    vkMapMemory(vkCtx_.device, stagingBufferMemory_, 0, imgSize, 0, &data);
-    memcpy(data, texture, (std::size_t)imgSize);
+    vkMapMemory(vkCtx_.device, stagingBufferMemory_, 0, details.imgSize, 0, &data);
+    memcpy(data, details.texture, (std::size_t)details.imgSize);
     vkUnmapMemory(vkCtx_.device, stagingBufferMemory_);
 
-    stbi_image_free(texture);
+    stbi_image_free(details.texture);
+
+    VkImageCreateInfo imageInfo{};
+    imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+    imageInfo.imageType = VK_IMAGE_TYPE_2D;
+    imageInfo.extent.width = (uint32_t)details.width;
+    imageInfo.extent.height = (uint32_t)details.height;
+    imageInfo.extent.depth = 1;
+    imageInfo.mipLevels = 1;
+    imageInfo.arrayLayers = 1;
+    imageInfo.format = VK_FORMAT_R8G8B8A8_SRGB;
+    imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+    imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    imageInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+    imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+
+    VK_CHECK(vkCreateImage(vkCtx_.device, &imageInfo, nullptr, &image_));
+
+    VkMemoryRequirements memoryRequirements{};
+    vkGetImageMemoryRequirements(vkCtx_.device, image_, &memoryRequirements);
+
+    VkMemoryAllocateInfo allocInfo{};
+    allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    allocInfo.allocationSize = memoryRequirements.size;
+    allocInfo.memoryTypeIndex = findMemoryType(memoryRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+
+    VK_CHECK(vkAllocateMemory(vkCtx_.device, &allocInfo, nullptr, &imageMemory_));
+
+    vkBindImageMemory(vkCtx_.device, image_, imageMemory_, 0);
 }
 
 // temporary
