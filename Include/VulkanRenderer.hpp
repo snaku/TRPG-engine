@@ -25,7 +25,7 @@ public:
     void prepareRender() override;
     void createObject() override;
     void createMesh(const RenderableData& data) override;
-    void renderFrame(const engine::Scene& scene, const Camera& camera) override;
+    void renderFrame(const std::vector<RenderableData>& renderables, const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix) override;
     void loadTexture(const std::filesystem::path& texturePath) override;
 
 private:

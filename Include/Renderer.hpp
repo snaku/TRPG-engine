@@ -3,13 +3,7 @@
 #include <string>
 #include <filesystem>
 
-class Camera;
 struct RenderableData;
-
-namespace engine
-{
-    class Scene;
-}
 
 class Renderer
 {
@@ -21,6 +15,6 @@ public:
     virtual void prepareRender() = 0;
     virtual void createObject() = 0;
     virtual void createMesh(const RenderableData& data) = 0;
-    virtual void renderFrame(const engine::Scene& scene, const Camera& camera) = 0;
+    virtual void renderFrame(const std::vector<RenderableData>& renderables, const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix) = 0;
     virtual void loadTexture(const std::filesystem::path& texturePath) = 0;
 };

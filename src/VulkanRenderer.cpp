@@ -33,17 +33,17 @@ void VulkanRenderer::prepareRender()
     vkCmdBuffer_ = std::make_unique<VulkanCommandBuffer>(vkCtx_, *vkDevice_, *vkSwapchain_, vkMeshes_);
 }
 
-void VulkanRenderer::renderFrame(const engine::Scene& scene, const Camera& camera)
+void VulkanRenderer::renderFrame(const std::vector<RenderableData>& renderables, const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix)
 {
     assert(vkCmdBuffer_ != nullptr);
 
-    vkCmdBuffer_->drawFrame(scene, camera);
-    vkDeviceWaitIdle(vkCtx_.device); // will do better later
+    vkCmdBuffer_->drawFrame(renderables, viewMatrix, projectionMatrix);
+    //vkDeviceWaitIdle(vkCtx_.device); // will do better later
 }
 
 void VulkanRenderer::createObject()
 {
-    std::vector<Vertex> vertices = 
+    /*std::vector<Vertex> vertices = 
     {
         {{-0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}}, // 0
         {{0.0f, 0.5f},   {1.0f, 1.0f, 1.0f}}, // 1
@@ -52,7 +52,7 @@ void VulkanRenderer::createObject()
     };
     std::vector<uint32_t> indices = { 0, 1, 2, 2, 1, 3 };
         
-    vkMeshes_.emplace_back(std::make_unique<VulkanMesh>(vkCtx_, *vkSwapchain_, vertices, indices));
+    vkMeshes_.emplace_back(std::make_unique<VulkanMesh>(vkCtx_, *vkSwapchain_, vertices, indices));*/
 }
 
 void VulkanRenderer::createMesh(const RenderableData& data)
