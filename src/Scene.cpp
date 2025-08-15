@@ -4,18 +4,53 @@
 namespace engine
 {
 
-GameObject& Scene::createGameObject(std::string_view name)
+GameObject& Scene::createGameObject(std::string_view name, ShapeType shape)
 {
-    std::vector<Vertex> vertices = 
+    std::vector<Vertex> vertices;
+    std::vector<uint32_t> indices;
+
+    switch (shape)
     {
-        {{-0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}}, // 0
-        {{0.0f, 0.5f},   {1.0f, 1.0f, 1.0f}}, // 1
-        {{0.5f, -0.5f},  {1.0f, 1.0f, 1.0f}}, // 2
-        {{1.0f, 0.5f},   {1.0f, 1.0f, 1.0f}}, // 3
-    };
+        case ShapeType::PARALLELOGRAM_2D:
+            vertices = 
+            {
+                {{0.0f, 0.0f, 0.0f}, {1.0f, 0.0f, 0.0f}},
+                {{1.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}},
+                {{1.5f, 1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}},
+                {{0.5f, 1.0f, 0.0f}, {1.0f, 1.0f, 0.0f}}
+            };
+            indices = 
+            {
+                0, 1, 2,
+                2, 3, 0
+            };
+            break;
+        case ShapeType::CUBE_3D:
+            vertices = 
+            {
+                {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.2f, 0.2f}}, // 0
+                {{ 0.5f, -0.5f, -0.5f}, {1.0f, 0.2f, 0.2f}}, // 1
+                {{ 0.5f,  0.5f, -0.5f}, {1.0f, 0.2f, 0.2f}}, // 2
+                {{-0.5f,  0.5f, -0.5f}, {1.0f, 0.2f, 0.2f}}, // 3
 
-    std::vector<uint32_t> indices = { 0, 1, 2, 2, 1, 3 };
+                {{-0.5f, -0.5f,  0.5f}, {0.2f, 1.0f, 0.2f}}, // 4
+                {{ 0.5f, -0.5f,  0.5f}, {0.2f, 1.0f, 0.2f}}, // 5
+                {{ 0.5f,  0.5f,  0.5f}, {0.2f, 1.0f, 0.2f}}, // 6
+                {{-0.5f,  0.5f,  0.5f}, {0.2f, 1.0f, 0.2f}}, // 7
+            };
 
+            indices = 
+            {
+                0, 1, 2, 2, 3, 0,
+                4, 6, 5, 6, 4, 7,
+                4, 0, 3, 3, 7, 4,
+                1, 5, 6, 6, 2, 1,
+                3, 2, 6, 6, 7, 3,
+                4, 5, 1, 1, 0, 4,
+            };
+            break;
+    }
+    
     auto gameObject = std::make_unique<GameObject>(std::string{name}, 0, 0, 0);
 
     RenderableData renderable;

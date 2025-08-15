@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Include/RenderableData.hpp"
+#include "Include/ShapeType.hpp"
 #include <string>
 #include <vector>
 #include <memory>
@@ -13,7 +14,7 @@ class GameObject;
 class Scene
 {
 public:
-    GameObject& createGameObject(std::string_view name);
+    GameObject& createGameObject(std::string_view name, ShapeType shape);
 
     void update(float deltaTime);
 
