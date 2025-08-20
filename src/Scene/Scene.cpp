@@ -71,7 +71,7 @@ GameObject& Scene::createGameObject(std::string_view name, ShapeType shape)
             break;
     }
     
-    auto gameObject = std::make_unique<GameObject>(std::string{name}, 0, 0, 0);
+    auto gameObject = std::make_unique<GameObject>(std::string{name});
 
     RenderableData renderable;
     renderable.gameObjectData = &gameObject->getData();
