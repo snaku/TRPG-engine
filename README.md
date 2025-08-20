@@ -1,39 +1,41 @@
 # TRPGEngine
 
-TRPGEngine is a little tactical rpg engine made in C++ with the Vulkan graphics API. For now, you can only draw multiple triangles. 
+TRPGEngine is a little tactical rpg engine made in C++ using the Vulkan graphics API. Still in development !
 
-![TRPGEngine triangles](https://github.com/user-attachments/assets/e477fd6b-c443-4723-bcf2-ebbb2266904e)
+# Features
 
+* **Camera system** -> Supports **Perspective** and **Isometric** views
+* **GameObject and Components** -> Add custom **components** to **objects**
+* **Scene management** -> Update multiple **GameObjects**
+* **Rendering** -> Render multiple **2D** and **3D** objects
+* **Input handling** -> Interact with scene via keyboard
+
+# Code Example
+
+Here is a little snippet of code to render a 20x20 cube plateform with an isometric camera:
 ```cpp
-#include "../Include/Engine.hpp"
-
-#include <iostream>
-
-int main()
-{
-	if (!engine::initWindow(800, 600, "Vulkan"))
-	{
-		return -1;
-	}
+if (!engine::initWindow(1280, 720, "Vulkan")) return -1;
 	
-	try 
-	{
-		engine::initEngine();
-		engine::createPipeline("shaders/vert.spv", "shaders/frag.spv");
-		engine::prepareRender();
+Camera camera({18.0f, 10.0f, 17.5f}, -55.0f, -35.0f, 45.0f);
+camera.setType(Camera::Type::Isometric);
 
-		while (!engine::windowShouldClose())
-		{
-			engine::pollEvents();
-			engine::render();
-		}
-	}
-	catch (const std::exception& e)
-	{
-		std::cerr << "Exception: " << e.what() << "\n";
-		return -1;
-	}
+engine::Scene scene;
 
-	return 0;
+const int gridSize = 20;
+for (int x = 0; x < gridSize; ++x)
+{
+	for (int z = 0; z < gridSize; ++z)
+	{
+		engine::GameObject& obj = scene.createGameObject("object", ShapeType::CUBE_3D);
+		TransformComponent* transform = obj.addComponent<TransformComponent>();
+		transform->position = { x + 1, 0.0f, z + 1 };
+	}
+}
+
+engine::initEngine();
+
+for (const auto& renderable : scene.getRenderableData())
+{
+	engine::createMesh(renderable);
 }
 ```
