@@ -1,13 +1,14 @@
 #include <GLFW/glfw3.h>
 #include <glm/gtc/quaternion.hpp>
 
-#include "Include/Engine.hpp"
-#include "Include/GameObject.hpp"
-#include "Include/ShapeType.hpp"
-#include "Include/Scene.hpp"
-#include "Include/TransformComponents.hpp"
-#include "Include/JumpComponent.hpp"
+#include <Core/Engine.hpp>
+#include <Core/Camera.hpp>
+#include <Scene/GameObject.hpp>
+#include <Scene/ShapeType.hpp>
+#include <Scene/Scene.hpp>
+#include <Scene/TransformComponents.hpp>
 
+// std
 #include <iostream>
 #include <chrono>
 
@@ -67,20 +68,31 @@ void processInput(Camera& camera, float deltaTime)
 		camera.rotateY(cameraRotationSpeed * deltaTime);		
 }
 
-int main()
+int main(int argc, char** argv)
 {
-	if (!engine::initWindow(1920, 1080, "Vulkan")) 
+	if (!engine::initWindow(1280, 720, "Vulkan")) 
 		return -1;
 	
-	Camera camera({0.0f, 10.0f, 10.0f}, -55.0f, -35.0f, 45.0f);
+	Camera camera({18.0f, 10.0f, 17.5f}, -55.0f, -35.0f, 45.0f);
+	camera.setType(Camera::Type::Isometric);
+	// camera.zoom(1.75f);
 
 	engine::Scene scene;
 
-	engine::GameObject& cube = scene.createGameObject("cube", ShapeType::CUBE_3D);
-	TransformComponent* transformCube = cube.addComponent<TransformComponent>();
+	const int gridSize = 20;
+	const float spacing = 2.0f;
+	float xSpacing = 1.0;
 
-	engine::GameObject& parallelogram = scene.createGameObject("parallelogram", ShapeType::PARALLELOGRAM_2D);
-	TransformComponent* transformParallelogram = parallelogram.addComponent<TransformComponent>();
+	for (int x = 0; x < gridSize; ++x)
+	{
+		for (int z = 0; z < gridSize; ++z)
+		{
+			// std::string name = "obj_" + std::to_string(x) + "_" + std::to_string(y) + "_" + std::to_string(z);
+			engine::GameObject& obj = scene.createGameObject("object", ShapeType::CUBE_3D);
+			TransformComponent* transform = obj.addComponent<TransformComponent>();
+			transform->position = { x + xSpacing, 0.0f, z + xSpacing };
+		}
+	}
 
 	try 
 	{
@@ -125,19 +137,6 @@ int main()
 			}
 
 			processInput(camera, deltaTime);
-
-			glm::vec3 dir = camera.getPosition() - transformParallelogram->position;
-			dir.y = 0.0f;
-			dir = glm::normalize(dir);
-
-			float angleY = atan2(dir.x, dir.z); 
-			float angleYDegrees = glm::degrees(angleY);
-			float correctedAngleYDegrees = angleYDegrees + 180.0f;
-			if (correctedAngleYDegrees > 360.0f)
-				correctedAngleYDegrees -= 360.0f;
-
-			transformParallelogram->rotation = glm::vec3(0.0f, correctedAngleYDegrees, 0.0f);
-			transformCube->rotation.y += 30.0f * deltaTime;
 
 			scene.update(deltaTime);
 
