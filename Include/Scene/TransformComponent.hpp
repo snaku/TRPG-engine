@@ -9,36 +9,24 @@
 
 struct TransformComponent : IComponent
 {
+    TransformComponent();
+    TransformComponent(const glm::vec3& pos, const glm::vec3& rot, const glm::vec3& sca);
+    TransformComponent(const TransformComponent& other);
+
     void update(float deltaTime) override;
 
+    const glm::mat4& getModelMatrix() const { return modelMatrix; }
+
     // operator overloading
-    bool operator==(const TransformComponent& other) const
-    {
-        return position == other.position &&
-               rotation == other.rotation && 
-               scale == other.scale;
-    }
-    bool operator!=(const TransformComponent& other) const
-    {
-        return !(*this == other);
-    }
-    TransformComponent& operator=(const TransformComponent& other)
-    {
-        // so we can't do something like transformComp = transformComp;
-        if (this != &other)
-        {
-            rotation = other.rotation;
-            position = other.position;
-            scale = other.scale;
-            modelMatrix = other.modelMatrix;
-        }
-            
-        return *this;
-    }
+    TransformComponent& operator=(const TransformComponent& other);
+    bool operator==(const TransformComponent& other) const;
+    bool operator!=(const TransformComponent& other) const;
 
-    glm::vec3 rotation{0.0f};
-    glm::vec3 position{0.0f};
-    glm::vec3 scale{1.0f};
+    // they are public because it's easier to use them like that
+    glm::vec3 position;
+    glm::vec3 rotation;
+    glm::vec3 scale;
 
+private:
     glm::mat4 modelMatrix{1.0f};
 };
