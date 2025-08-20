@@ -21,8 +21,8 @@ public:
 
     // rotation
     void rotate(float yaw, float pitch);
-    void rotateY(float yaw);
-    void rotateX(float pitch);
+    inline void rotateY(float yaw);
+    inline void rotateX(float pitch);
 
     void zoom(float factor);
     

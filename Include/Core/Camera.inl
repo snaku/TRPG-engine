@@ -12,10 +12,20 @@ inline void Camera::setType(Type type)
 
 inline void Camera::moveForward(float distance)
 {
-    move(glm::vec3(0, 0, distance));
+    move({0, 0, distance});
 }
 
 inline void Camera::moveRight(float distance)
 {
-    move(glm::vec3(distance, 0, 0));
+    move({distance, 0, 0});
+}
+
+inline void Camera::rotateY(float yaw)
+{
+    rotate(yaw, 0);
+}
+
+inline void Camera::rotateX(float pitch)
+{
+    rotate(0, pitch);
 }
