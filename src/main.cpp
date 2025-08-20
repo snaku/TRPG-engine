@@ -6,29 +6,11 @@
 #include <Scene/GameObject.hpp>
 #include <Scene/ShapeType.hpp>
 #include <Scene/Scene.hpp>
-#include <Scene/TransformComponents.hpp>
+#include <Scene/TransformComponent.hpp>
 
 // std
 #include <iostream>
 #include <chrono>
-
-/*const int gridSize = 20; // 20 x 20 x 20 = 8000 objects
-	const float spacing = 2.0f;
-	float xSpacing = 1.0;
-
-	for (int x = 0; x < gridSize; ++x)
-	{
-		for (int y = 0; y < gridSize; ++y)
-		{
-			for (int z = 0; z < gridSize; ++z)
-			{
-				// std::string name = "obj_" + std::to_string(x) + "_" + std::to_string(y) + "_" + std::to_string(z);
-				engine::GameObject& obj = scene.createGameObject("object");
-				TransformComponent* transform = obj.addComponent<TransformComponent>();
-				transform->position = { x + xSpacing, y + xSpacing, z * spacing };
-			}
-		}
-	}*/
 
 void processInput(Camera& camera, float deltaTime)
 {
@@ -75,7 +57,6 @@ int main(int argc, char** argv)
 	
 	Camera camera({18.0f, 10.0f, 17.5f}, -55.0f, -35.0f, 45.0f);
 	camera.setType(Camera::Type::Isometric);
-	// camera.zoom(1.75f);
 
 	engine::Scene scene;
 
@@ -83,7 +64,7 @@ int main(int argc, char** argv)
 	const float spacing = 2.0f;
 	float xSpacing = 1.0;
 
-	for (int x = 0; x < gridSize; ++x)
+	/*for (int x = 0; x < gridSize; ++x)
 	{
 		for (int z = 0; z < gridSize; ++z)
 		{
@@ -92,6 +73,17 @@ int main(int argc, char** argv)
 			TransformComponent* transform = obj.addComponent<TransformComponent>();
 			transform->position = { x + xSpacing, 0.0f, z + xSpacing };
 		}
+	}*/
+	engine::GameObject& cube = scene.createGameObject("object", ShapeType::CUBE_3D);
+	TransformComponent* transform = cube.addComponent<TransformComponent>();
+
+	engine::GameObject& cube2 = scene.createGameObject("object2", ShapeType::CUBE_3D);
+	TransformComponent* transform2 = cube2.addComponent<TransformComponent>();
+
+	if (*transform2 != *transform)
+	{
+		std::cout << "aaa\n";
+		*transform2 = *transform;
 	}
 
 	try 
@@ -137,6 +129,12 @@ int main(int argc, char** argv)
 			}
 
 			processInput(camera, deltaTime);
+
+			if (*transform2 == *transform)
+			{
+				std::cout << "aaaa\n";
+				transform2->position.x = 10.0f;
+			}
 
 			scene.update(deltaTime);
 
