@@ -5,11 +5,11 @@
 namespace engine
 {
 
-GameObject::GameObject(std::string name, float xPos, float yPos, float zPos) 
-    : name_(std::move(name)), pos_({xPos, yPos, zPos})
+GameObject::GameObject(const std::string& name) 
+    : name_(name)
 {
     data_.model = glm::mat4(1.0f);
-    data_.position = pos_;
+    data_.position = glm::vec3(0.0f, 0.0f, 0.0f);
 }
 
 void GameObject::update(float deltaTime)
@@ -22,12 +22,15 @@ void GameObject::update(float deltaTime)
         }
     }
 
-    auto transform = getComponent<TransformComponent>();
-
-    if (transform)
+    if (!transform_)
     {
-        data_.model = transform->modelMatrix;
-        data_.position = transform->position;
+        transform_ = getComponent<TransformComponent>();
+    }
+    
+    if (transform_)
+    {
+        data_.model = transform_->getModelMatrix();
+        data_.position = transform_->position;
     }
 }
 
