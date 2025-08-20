@@ -27,4 +27,18 @@ struct TransformComponent : IComponent
 
         modelMatrix = mat;
     }
+
+    // operator overloading
+    bool operator==(const TransformComponent& other) const
+    {
+        return position == other.position &&
+               rotation == other.rotation && 
+               scale == other.scale;
+    }
+    bool operator!=(const TransformComponent& other) const
+    {
+        return position != other.position ||
+               rotation != other.rotation || 
+               scale != other.scale;
+    }
 };
