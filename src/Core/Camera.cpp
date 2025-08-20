@@ -36,19 +36,6 @@ void Camera::rotate(float yaw, float pitch)
     if (pitch_ < -89.0f) pitch_ = -89.0f;
 }
 
-void Camera::rotateX(float pitch)
-{
-    pitch_ += pitch;
-
-    if (pitch_ > 89.0f) pitch_ = 89.0f;
-    if (pitch_ < -89.0f) pitch_ = -89.0f;
-}
-
-void Camera::rotateY(float yaw)
-{
-    yaw_ += yaw;
-}
-
 void Camera::zoom(float factor)
 {
     if (type_ == Type::Perspective)
