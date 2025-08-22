@@ -4,6 +4,6 @@
 
 struct IComponent
 {
-    virtual void update(float deltaTime) = 0;
     virtual ~IComponent() = default;
+    virtual void update(float deltaTime) = 0;
 };

@@ -13,7 +13,7 @@ struct TransformComponent : IComponent
     TransformComponent(const glm::vec3& pos, const glm::vec3& rot, const glm::vec3& sca);
     TransformComponent(const TransformComponent& other);
 
-    void update(float deltaTime) override;
+    void update([[maybe_unused]] float deltaTime) override;
 
     const glm::mat4& getModelMatrix() const { return modelMatrix; }
 

@@ -15,7 +15,7 @@ TransformComponent::TransformComponent(const TransformComponent& other)
     modelMatrix = other.modelMatrix;
 }
 
-void TransformComponent::update(float deltaTime)
+void TransformComponent::update([[maybe_unused]] float deltaTime)
 {
     glm::mat4 mat = glm::mat4(1.0f);
 
@@ -47,8 +47,8 @@ TransformComponent& TransformComponent::operator=(const TransformComponent& othe
 bool TransformComponent::operator==(const TransformComponent& other) const
 {
     return position == other.position &&
-            rotation == other.rotation && 
-            scale == other.scale;
+           rotation == other.rotation && 
+           scale == other.scale;
 }
 
 bool TransformComponent::operator!=(const TransformComponent& other) const
