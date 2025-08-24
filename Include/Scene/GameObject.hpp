@@ -34,12 +34,23 @@ public:
     template<typename T>
     void removeComponent();
 
+    void addParent(GameObject& parent);
+    void removeParent(GameObject& parent);
+
+    void addChild(GameObject& child);
+    void removeChild(GameObject& child);
+    bool hasChildren() const;
+    bool isAChildOf(const GameObject& parent) const;
+
     void update(float deltaTime);
 
     // getters
     const GameObjectData& getData() const { return data_; }
     const std::string& getName() const { return name_; }
 private:
+    GameObject* parent_ = nullptr;
+    std::vector<GameObject*> children_;
+
     GameObjectData data_;
 
     std::vector<std::shared_ptr<::IComponent>> components_;
